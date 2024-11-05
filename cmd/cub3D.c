@@ -16,7 +16,7 @@ int main(int ac, char **av)
 		perr(__func__, "malloc failed");
 		return (1);
 	}
-	game = &(t_game){0};
+	ft_memset(game, 0, sizeof(t_game));
 	err = game_init(game, av[1]);
 	if (err != OK)
 	{
