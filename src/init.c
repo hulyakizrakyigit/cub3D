@@ -11,9 +11,12 @@ t_err game_init(t_game *game, char *path)
 	err = map_path_control(path);
 	if (err != OK)
 		return (perr(__func__, "map_path_control failed"));
-	err = map_init(&game->map, path);
+	game->map.path = ft_strdup(path);
+	if (!game->map.path)
+		return (perr(__func__, "ft_strdup failed"));
+	err = texture_init(&game->map, path);
 	if (err != OK)
-		return (perr(__func__, "map_init failed"));
+		return (perr(__func__, "texture_init failed"));
 	return (OK);
 }
 t_err map_path_control(char *path)
@@ -31,179 +34,13 @@ t_err map_path_control(char *path)
 	return (OK);
 }
 
-void set_texture_dir(char *line,  t_map *map)
-{
-	if (!line)
-		return ;
-	if (ft_strncmp(line, "NO ", 3) == 0)
-	{
-		map->texture.NO.path = ft_strtrim(line + 3, " ");
-		map->texture.NO.count++;
-	}
-	else if (ft_strncmp(line, "SO ", 3) == 0)
-	{
-		map->texture.SO.path = ft_strtrim(line + 3, " ");
-		map->texture.SO.count++;
-	}
-	else if (ft_strncmp(line, "WE ", 3) == 0)
-	{
-		map->texture.WE.path = ft_strtrim(line + 3, " ");
-		map->texture.WE.count++;
-	}
-	else if (ft_strncmp(line, "EA ", 3) == 0)
-	{
-		map->texture.EA.path = ft_strtrim(line + 3, " ");
-		map->texture.EA.count++;
-	}
-}
-
-bool	strevery(int (*func)(int c),  const char *str)
-{
-	int	i;
-
-	if (!func || !str)
-		return (perr(__func__, "'func' or 'str' cannot be null"), 0);
-	i = 0;
-	while (str[i])
-	{
-		if (!func(str[i]))
-			return (0);
-		i++;
-	}
-	return (1);
-}
-t_err is_invalid_color(char **rgb_str_arr)
-{
-	int i;
-
-	i = 0;
-	while (rgb_str_arr[i])
-	{
-		rgb_str_arr[i] = ft_strtrim(rgb_str_arr[i], "\t\v\f\r\n ");
-		if (!strevery(&ft_isdigit, rgb_str_arr[i]))
-			return (perr(__func__, "Invalid color"));
-		i++;
-	}
-	return (OK);
-}
-
-
-t_err check_texture_color(char *line,  t_map *map)
-{
-	if (!line)
-		return (ERR);
-	if (!ft_strncmp(line, "F ", 2))
-	{
-		map->texture.F.rgb_str = ft_strtrim(line + 2, " ");
-		map->texture.F.rgb_str_arr = ft_split(map->texture.F.rgb_str, ',');
-		if (!is_invalid_color(map->texture.F.rgb_str_arr))
-			return (ERR);
-	}
-	else if (!ft_strncmp(line, "C ", 2))
-	{
-		map->texture.C.rgb_str = ft_strtrim(line + 2, " ");
-		map->texture.C.rgb_str_arr = ft_split(map->texture.C.rgb_str, ',');
-		if (!is_invalid_color(map->texture.C.rgb_str_arr))
-			return (ERR);
-	}
-	return (OK);
-}
-void set_texture_color_F(t_texture *texture)
-{
-	int i;
-
-	i = 0;
-	while (texture->F.rgb_str_arr[i])
-	{
-		if (i == 0)
-			texture->F.R = ft_atoi(texture->F.rgb_str_arr[i]);
-		if (i == 1)
-			texture->F.G = ft_atoi(texture->F.rgb_str_arr[i]);
-		if (i == 2)
-			texture->F.B = ft_atoi(texture->F.rgb_str_arr[i]);
-		i++;
-	}
-	texture->F.count++;
-}
-void set_texture_color_C(t_texture *texture)
-{
-	int i;
-
-	i = 0;
-	while (texture->C.rgb_str_arr[i])
-	{
-		if (i == 0)
-			texture->C.R = ft_atoi(texture->C.rgb_str_arr[i]);
-		if (i == 1)
-			texture->C.G = ft_atoi(texture->C.rgb_str_arr[i]);
-		if (i == 2)
-			texture->C.B = ft_atoi(texture->C.rgb_str_arr[i]);
-		i++;
-	}
-	texture->C.count++;
-}
-
-t_err control_texture_color(t_color *color)
-{
-	if (color->R < 0 || color->R > 255)
-		return (perr(__func__, "Invalid color R"));
-	if (color->G < 0 || color->G > 255)
-		return (perr(__func__, "Invalid color G"));
-	if (color->B < 0 || color->B > 255)
-		return (perr(__func__, "Invalid color B"));
-	if (color->count != 1)
-		return (perr(__func__, "Invalid color count."));
-	return (OK);
-}
-
-t_err control_texture_dir(t_texture *texture)
-{
-	// printf("NO: %d\n", texture->NO.count);
-	// printf("SO: %d\n", texture->SO.count);
-	// printf("WE: %d\n", texture->WE.count);
-	// printf("EA: %d\n", texture->EA.count);
-	if (texture->NO.count != 1)
-	{
-	return (perr(__func__, "Invalid texture NO count."));
-	}
-	if (texture->SO.count != 1)
-		return (perr(__func__, "Invalid texture SO count."));
-	if (texture->WE.count != 1)
-		return (perr(__func__, "Invalid texture WE count."));
-	if (texture->EA.count != 1)
-		return (perr(__func__, "Invalid texture EAcount."));
-	return (OK);
-}
-
-t_err set_texture(char *line, t_map *map)
-{
-	if (!ft_strncmp(line, "NO ", 3) || !ft_strncmp(line, "SO ", 3) || !ft_strncmp(line, "WE ", 3) || !ft_strncmp(line, "EA ", 3))
-	{
-		set_texture_dir(line, map);
-	}
-	if (!ft_strncmp(line, "F ", 2))
-	{
-		if (!check_texture_color(line, map))
-			return (ERR);
-		set_texture_color_F(&map->texture);
-	}
-	if (!ft_strncmp(line, "C ", 2))
-	{
-		if (!check_texture_color(line, map))
-			return (ERR);
-		set_texture_color_C(&map->texture);
-	}
-	return (OK);
-}
-
-t_err map_init(t_map *map, char *path)
+int spaceless_len(char *path, t_map *map)
 {
 	int fd;
 	char *line;
-	t_err err;
+	int len;
 
-	if (!map || !path)
-		return (perr(__func__, "unexpected error"));
+	len = 0;
 	fd = open(path, O_RDONLY);
 	if (fd < 0)
 		return (perr(__func__, "open failed"));
@@ -212,13 +49,104 @@ t_err map_init(t_map *map, char *path)
 		line = get_next_line(fd);
 		if (!line)
 			break ;
-		err = set_texture(line, map);
-		if (err != OK)
-			return (free(line), close(fd), err);
+		if (is_empty_line(line) && ft_strlen(line) > 1)
+		{
+			if ((size_t)map->map_width < ft_strlen(line))
+				map->map_width = ft_strlen(line);
+			len++;
+		}
 		free(line);
 	}
-	control_texture_dir(&map->texture);
-	control_texture_color(&map->texture.C);
-	control_texture_color(&map->texture.F);
-	return (close(fd), OK);
+	close(fd);
+	printf("len: %d\n", len);
+	return (len);
+}
+t_err	prepare_map_init(t_map *map, char *path)
+{
+	int fd;
+	char *line;
+	int i;
+	int j;
+	int spaceless;
+
+	i = 0;
+	j = 0;
+	if (!map || !path)
+		return (perr(__func__, "unexpected error"));
+	spaceless = (spaceless_len(path, map) - 6);
+	printf("spaceless: %d\n", spaceless);
+	printf("map->row: %d\n", map->row);
+	fd = open(path, O_RDONLY);
+	if (fd < 0)
+		return (perr(__func__, "open failed"));
+	map->map = malloc(sizeof(char *) * (map->map_len - spaceless + 1));
+	if (!map->map)
+		return (perr(__func__, "malloc failed"));
+	while (1)
+	{
+		line = get_next_line(fd);
+		if (!line)
+			break ;
+		if (i >= ((map->row)))
+		{
+			map->map[j] = malloc(sizeof(char) * (map->map_width + 1));
+			if (!map->map[j])
+				return (strr_arr_dispose(map->map), perr(__func__, "ft_strdup failed"));
+			map->map[j] = ft_strdup(line);
+			j++;
+		}
+		i++;
+		free(line);
 	}
+	map->map[j] = NULL;
+	return (close(fd), OK);
+}
+
+t_err map_control(t_map *map)
+{
+	int i;
+	int j;
+	char *line;
+
+	i = 0;
+	j = 0;
+	int d = 0;
+	line = malloc(sizeof(char) * (map->map_width + 1));
+	while (map->map[d])
+	{
+		printf("%d %s\n",d, map->map[d]);
+		d++;
+	}
+	while (is_empty_line(map->map[i]) && ft_strlen(map->map[i]) == 1)
+	{
+		i++;
+		continue;
+	}
+	while (map->map[i][j])
+	{
+		printf("baş: %s %zu\n", map->map[i], ft_strlen(map->map[i]));
+		line = ft_strtrim(map->map[i], "\n\v\t\r ");
+		printf("line: %s %zu\n", line, ft_strlen(line));
+		if ((size_t)j < (ft_strlen(line) - 1) && line[j] != '1')
+		{
+			printf("C::::::%c %d\n", line[j], j);
+			return (perr(__func__, "Invalid map, surrounded by walls1"));
+		}
+		j++;
+	}
+	i = map->map_len - 1;
+	j = 0;
+	while (is_empty_line(map->map[i]) && ft_strlen(map->map[i]) == 1)
+	{
+		i--;
+		continue;
+	}
+	while (map->map[i][j])
+	{
+		line = ft_strtrim(map->map[i], "\n\v\t\r ");
+		if (line[j] != '1')
+			return (perr(__func__, "Invalid map, surrounded by walls2"));
+		j++;
+	}
+	return (OK);
+}
