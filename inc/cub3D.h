@@ -47,6 +47,13 @@ typedef struct s_texture
 
 } t_texture;
 
+
+typedef struct s_player
+{
+	int x;
+	int y;
+	char direction;
+} t_player;
 typedef struct s_map
 {
 	char	**map;
@@ -55,6 +62,10 @@ typedef struct s_map
 	int		row;
 	int 	map_len;
 	int 	map_width;
+	int 	map_start;
+	int 	map_end;
+	int 	player_count;
+	t_player player;
 } t_map;
 
 typedef struct s_game
