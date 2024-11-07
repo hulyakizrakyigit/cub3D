@@ -74,8 +74,6 @@ t_err	prepare_map_init(t_map *map, char *path)
 	if (!map || !path)
 		return (perr(__func__, "unexpected error"));
 	spaceless = (spaceless_len(path, map) - 6);
-	printf("spaceless: %d\n", spaceless);
-	printf("map->row: %d\n", map->row);
 	fd = open(path, O_RDONLY);
 	if (fd < 0)
 		return (perr(__func__, "open failed"));
@@ -101,6 +99,16 @@ t_err	prepare_map_init(t_map *map, char *path)
 	map->map[j] = NULL;
 	return (close(fd), OK);
 }
+bool str_include(char *str, char c)
+{
+	while (*str)
+	{
+		if (*str != c)
+			return (false);
+	}
+	return (true);
+}
+
 
 t_err map_control(t_map *map)
 {
@@ -110,43 +118,28 @@ t_err map_control(t_map *map)
 
 	i = 0;
 	j = 0;
-	int d = 0;
 	line = malloc(sizeof(char) * (map->map_width + 1));
-	while (map->map[d])
-	{
-		printf("%d %s\n",d, map->map[d]);
-		d++;
-	}
-	while (is_empty_line(map->map[i]) && ft_strlen(map->map[i]) == 1)
-	{
+	while (is_empty_line(map->map[i]) && ft_strlen(map->map[i]) == 1) // <= || ==
 		i++;
-		continue;
-	}
-	while (map->map[i][j])
-	{
-		printf("baş: %s %zu\n", map->map[i], ft_strlen(map->map[i]));
-		line = ft_strtrim(map->map[i], "\n\v\t\r ");
-		printf("line: %s %zu\n", line, ft_strlen(line));
-		if ((size_t)j < (ft_strlen(line) - 1) && line[j] != '1')
-		{
-			printf("C::::::%c %d\n", line[j], j);
-			return (perr(__func__, "Invalid map, surrounded by walls1"));
-		}
-		j++;
-	}
-	i = map->map_len - 1;
-	j = 0;
-	while (is_empty_line(map->map[i]) && ft_strlen(map->map[i]) == 1)
-	{
-		i--;
-		continue;
-	}
-	while (map->map[i][j])
-	{
-		line = ft_strtrim(map->map[i], "\n\v\t\r ");
-		if (line[j] != '1')
-			return (perr(__func__, "Invalid map, surrounded by walls2"));
-		j++;
-	}
+	line = ft_strtrim(map->map[i], "\n\v\t\r ");
+	printf("lineaaaaaa: %s\n", line);
+	if (!line || !(str_include(line, '1') || str_include(line, '0')))
+		return (perr(__func__, "Invalid map, surrounded by walls1"));
+	free(line);
+	// i  = map->map_len - map->row - 1;
+	// printf("%d\n", i);
+	// printf("%s\n", map->map[i]);
+	// while (is_empty_line(map->map[i]) && ft_strlen(map->map[i]) == 1) // <= || ==
+	// 	i--;
+	// while (map->map[i])
+	// {
+	// 	printf("map[%d]: %s\n", i, map->map[i]);
+	// 	line = ft_strtrim(map->map[i], "\n\v\t\r ");
+	// 	printf("line: %s\n", line);
+	// 	if (!line || !all_chars_are("1", line))
+	// 		return (free(line), perr(__func__, "Invalid map, surrounded by walls2"));
+	// 	i--;
+	// }
+	//free(line);
 	return (OK);
 }

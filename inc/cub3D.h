@@ -55,7 +55,6 @@ typedef struct s_map
 	int		row;
 	int 	map_len;
 	int 	map_width;
-
 } t_map;
 
 typedef struct s_game
