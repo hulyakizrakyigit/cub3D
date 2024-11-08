@@ -34,50 +34,21 @@ t_err map_path_control(char *path)
 	return (OK);
 }
 
-int spaceless_len(char *path, t_map *map)
-{
-	int fd;
-	char *line;
-	int len;
-
-	len = 0;
-	fd = open(path, O_RDONLY);
-	if (fd < 0)
-		return (perr(__func__, "open failed"));
-	while (1)
-	{
-		line = get_next_line(fd);
-		if (!line)
-			break ;
-		if (is_empty_line(line) && ft_strlen(line) > 1)
-		{
-			if ((size_t)map->map_width < ft_strlen(line))
-				map->map_width = ft_strlen(line);
-			len++;
-		}
-		free(line);
-	}
-	close(fd);
-	printf("len: %d\n", len);
-	return (len);
-}
 t_err	prepare_map_init(t_map *map, char *path)
 {
 	int fd;
 	char *line;
 	int i;
 	int j;
-	int spaceless;
 
 	i = 0;
 	j = 0;
 	if (!map || !path)
 		return (perr(__func__, "unexpected error"));
-	spaceless = (spaceless_len(path, map) - 6);
 	fd = open(path, O_RDONLY);
 	if (fd < 0)
 		return (perr(__func__, "open failed"));
-	map->map = malloc(sizeof(char *) * (map->map_len - spaceless + 1));
+	map->map = malloc(sizeof(char *) * (map->map_len - map->row + 1));
 	if (!map->map)
 		return (perr(__func__, "malloc failed"));
 	while (1)
@@ -87,10 +58,9 @@ t_err	prepare_map_init(t_map *map, char *path)
 			break ;
 		if (i >= ((map->row)))
 		{
-			map->map[j] = malloc(sizeof(char) * (map->map_width + 1));
+			map->map[j] = ft_strdup(line);
 			if (!map->map[j])
 				return (strr_arr_dispose(map->map), perr(__func__, "ft_strdup failed"));
-			map->map[j] = ft_strdup(line);
 			j++;
 		}
 		i++;
@@ -99,6 +69,7 @@ t_err	prepare_map_init(t_map *map, char *path)
 	map->map[j] = NULL;
 	return (close(fd), OK);
 }
+
 bool is_one_or_space(char c)
 {
 	return (c == '1' || c == ' ');
@@ -157,10 +128,6 @@ t_err	map_control_centrals_items(t_map *map, char *line, int x)
 		}
 		else
 		{
-			printf("line: %s\n", line);
-			printf("line[y]: %c\n", line[y]);
-			printf("y: %d\n", y);
-
 			return (perr(__func__, "Invalid map(undefined item)"));
 		}
 
@@ -180,10 +147,8 @@ t_err	map_control_centrals(t_map *map)
 		while (map->map[i])
 		{
 		line = ft_strtrim(map->map[i], "\n\v\t\r ");
-		if ((line && (ft_strlen(line) > 1)) && (line[0] != '1' || line[ft_strlen(line) - 1] != '1'))
+		if (((ft_strlen(line) >= 1)) && line[0] ==  '0' && (line[0] != '1' || line[ft_strlen(line) - 1] != '1'))
 		{
-			printf("line: %s\n", line);
-
 			return (free(line), perr(__func__, "Invalid map, surrounded by walls3"));
 		}
 		if (ft_strlen(line) > 1)
@@ -197,7 +162,7 @@ t_err	map_control_centrals(t_map *map)
 	}
 	return (free(line), OK);
 }
-t_err map_control(t_map *map)
+t_err	map_control(t_map *map)
 {
 	int i;
 	char *line;
@@ -205,23 +170,119 @@ t_err map_control(t_map *map)
 
 	i = 0;
 	line = malloc(sizeof(char) * (map->map_width + 1));
-	while (is_empty_line(map->map[i]) && ft_strlen(map->map[i]) == 1) // <= || ==
+	if (!line)
+		return (perr(__func__, "Memory allocation failed"));
+	while (is_empty_line(map->map[i]) && ft_strlen(map->map[i]) == 1 && i < map->map_len)
 		i++;
 	map->map_start = i;
-	line = ft_strtrim(map->map[i], "\n\v\t\r ");
+	line = ft_strtrim(map->map[map->map_start], "\n\v\t\r ");
 	if (!line || !all_chars_are(line))
 		return (free(line), perr(__func__, "Invalid map, surrounded by walls1"));
 	free(line);
-	i  = map->map_len - map->row - 1;
-	while (is_empty_line(map->map[i]) && ft_strlen(map->map[i]) == 1) // <= || ==
+	i = map->map_len - map->row - 1;
+	while (i >= 0 && map->map[i] && is_empty_line(map->map[i]) && ft_strlen(map->map[i]) == 1)
 		i--;
 	map->map_end = i;
-	line = ft_strtrim(map->map[i], "\n\v\t\r ");
+	line = ft_strtrim(map->map[map->map_end], "\n\v\t\r ");
 	if (!line || !all_chars_are(line))
 		return (free(line), perr(__func__, "Invalid map, surrounded by walls2"));
 	free(line);
 	err = map_control_centrals(map);
 	if (err != OK)
-		return (err);
+		return (perr(__func__, "map_control_centrals failed"));
 	return (OK);
+}
+
+int	map_width(t_map *map)
+{
+	int i;
+	int max;
+	int len;
+
+	i = 0;
+	max = 0;
+	while (map->map[i])
+	{
+		len = ft_strlen(map->map[i]);
+		if (len > max)
+			max = len;
+		i++;
+	}
+	return (max);
+}
+
+// t_err	map_control_part(t_map *map)
+// {
+// 	int i;
+// 	int j;
+
+// 	i = 0;
+// 	j = 0;
+// 	map->map_H = malloc(sizeof(char *) * (map->map_len - map->row + 1));
+// 	if (!map->map_H)
+// 		return (perr(__func__, "malloc failed"));
+// 	map->map_width = map_width(map);
+// 	while (map->map[i])
+// 	{
+// 		map->map_H[j] = malloc(sizeof(char) * (map->map_width + 1));
+// 		if (!map->map_H[j])
+// 			return (perr(__func__, "malloc failed"));
+// 		while (j < map->map_width)
+// 		{
+// 		if (map->map[i][j] && (map->map[i][j] != ' ' || map->map[i][j] != '\t' || map->map[i][j] != '\v' || map->map[i][j] != '\f' || map->map[i][j] != '\r' || map->map[i][j] != '\n'))
+// 			map->map_H[j][i] = map->map[i][j];
+// 		else
+// 			map->map_H[j][i] = 'H';
+// 	printf("AAAAAAAAAAAAAAAA\n");
+// 			j++;
+// 		}
+// 		i++;
+// 	}
+// 	map->map_H[j] = NULL;
+// 	return (OK);
+// }
+t_err map_control_part(t_map *map)
+{
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
+	map->map_width = map_width(map);
+    map->map_H = malloc(sizeof(char *) * (map->map_len - map->row + 1));
+    if (!map->map_H)
+        return (perr(__func__, "malloc failed(map_H)"));
+	while (i < map->map_len - map->row )
+	{
+		map->map_H[i] = malloc(sizeof(char) * (map->map_width + 1));
+		ft_memset(map->map_H[i], 'H', map->map_width + 1);
+		map->map_H[i][map->map_width] = '\0';
+		i++;
+	}
+	map->map_H[i] = NULL;
+	while (map->map_H[i])
+	{
+		printf("i: %d %s\n",i, map->map_H[i]);
+		i++;
+	}
+for (i = 0; i < map->map_len - map->row; i++)
+	{
+		j = 0;
+		while (map->map[i][j] != '\0')
+		{
+			if (map->map[i][j] == ' ' || map->map[i][j] == '\t' || map->map[i][j] == '\v' ||
+				map->map[i][j] == '\f' || map->map[i][j] == '\r' || map->map[i][j] == '\n')
+				map->map_H[i][j] = 'H';
+			else
+				map->map_H[i][j] = map->map[i][j];
+			j++;
+		}
+	}
+
+	// Sonucu kontrol etmek için map_H'i yazdırma
+	for (i = 0; map->map_H[i] != NULL; i++)
+	{
+		printf("i: %d %s\n", i, map->map_H[i]);
+	}
+    return (OK);
 }

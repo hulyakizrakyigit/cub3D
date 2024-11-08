@@ -57,6 +57,7 @@ typedef struct s_player
 typedef struct s_map
 {
 	char	**map;
+	char	**map_H;
 	t_texture texture;
 	char	*path;
 	int		row;
@@ -91,6 +92,8 @@ bool	is_empty_line(char *line);
 t_err	prepare_map_init(t_map *map, char *path);
 void	strr_arr_dispose(char **arr);
 t_err map_control(t_map *map);
+t_err	map_control_part(t_map *map);
+
 
 
 
