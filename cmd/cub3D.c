@@ -59,6 +59,13 @@ int main(int ac, char **av)
 		free(game);
 		return (1);
 	}
+	err = validate_map(game->map.map_H);
+	if (err != OK)
+	{
+		perr(__func__, "validate_map failed");
+		free(game);
+		return (1);
+	}
 
 	free(game);
 	return (0);

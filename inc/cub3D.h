@@ -95,6 +95,8 @@ t_err map_control(t_map *map);
 t_err	map_H(t_map *map);
 t_err	control_reachable_player(t_map *map);
 t_err map_control_part(t_map *map);
+t_err validate_map(char **map);
+
 
 
 

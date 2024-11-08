@@ -256,7 +256,7 @@ t_err map_H(t_map *map)
 	i = 0;
 	while (map->map_H[i])
 	{
-		printf("i: %d %s\n",i, map->map_H[i]);
+		printf("%s\n", map->map_H[i]);
 		i++;
 	}
 	return (OK);
@@ -305,3 +305,85 @@ t_err map_control_part(t_map *map)
 	}
 	return (OK);
 }
+
+void flood_fill(char **map, int x, int y)
+{
+    if (x < 0 || y < 0 || map[y] == NULL || map[y][x] == '\0')
+        return;
+    if (map[y][x] == 'H')
+        return;
+    if (map[y][x] == '1' || map[y][x] == '0' || map[y][x] == 'N')
+        map[y][x] = 'K';
+    else
+        return;
+
+    flood_fill(map, x + 1, y);
+    flood_fill(map, x - 1, y);
+    flood_fill(map, x, y + 1);
+    flood_fill(map, x, y - 1);
+}
+
+t_err is_map_valid(char **map)
+{
+    int i;
+	int j;
+
+	i = 0;
+	while (map[i])
+	{
+		printf("%s\n", map[i]);
+		i++;
+	}
+	i = 0;
+    while (map[i])
+    {
+	j = 0;
+		while (map[i][j])
+		{
+		if (map[i][j] == '1' || map[i][j] == '0' || map[i][j] == 'N')
+			return (perr(__func__, "invalid map, map count is not one"));
+		j++;
+		}
+	i++;
+    }
+    return (OK);
+}
+
+
+
+t_err validate_map(char **map)
+{
+    int start_x;
+	int start_y;
+	int i;
+	int j;
+	t_err err;
+
+
+	start_x = -1;
+	start_y = -1;
+	i = 0;
+
+	while (map[i] != NULL && start_x == -1)
+    {
+	j = 0;
+	while (map[i][j] != '\0')
+	{
+	if (map[i][j] == '1')
+	{
+		start_y = i;
+		start_x = j;
+			break;
+	}
+	j++;
+	}
+	i++;
+}
+    if (start_x != -1 && start_y != -1)
+        flood_fill(map, start_x, start_y);
+	err = is_map_valid(map);
+	if (err != OK)
+		return (perr(__func__, "is_map_valid failed"));
+    return (OK);
+}
+
