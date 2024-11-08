@@ -75,29 +75,49 @@ typedef struct s_game
 
 } t_game;
 
+// err.c
 t_err	perr(const char *func, const char *msg);
+
+//init.c
 t_err 	game_init(t_game *game, char *path);
 t_err 	map_path_control(char *path);
-t_err 	texture_init(t_map *map, char *path);
-t_err control_texture_dir(t_texture *texture);
-t_err set_texture(char *line, t_map *map);
-void set_texture_dir(char *line,  t_map *map);
-void set_texture_color_F(t_texture *texture);
-void set_texture_color_C(t_texture *texture);
-t_err control_texture_color(t_color *color);
-t_err is_invalid_color(char **rgb_str_arr);
+t_err	prepare_map_init(t_map *map, char *path);
+
+//control_map_items.c
+t_err	map_control_centrals_items(t_map *map, char *line, int x);
+t_err	map_control_centrals(t_map *map);
+int	map_width(t_map *map);
+t_err map_H(t_map *map);
+t_err	control_player(t_map *map);
+
+//control_map.c
+t_err is_map_valid(char **map);
+t_err validate_map(char **map);
+t_err map_control_part(t_map *map);
+t_err	map_control(t_map *map);
+
+//helper.c
+void flood_fill(char **map, int x, int y);
+bool is_one_or_space(char c);
+bool all_chars_are(char *str);
+
+//init_texture.c
+t_err	texture_init(t_map *map, char *path);
+t_err	control_texture_color(t_color *color);
+t_err	is_invalid_color(char **rgb_str_arr);
 t_err	check_texture_color(char *line,  t_map *map);
+
+//set_texture.c
+t_err	control_texture_dir(t_texture *texture);
+t_err	set_texture(char *line, t_map *map);
+void	set_texture_dir(char *line,  t_map *map);
+void	set_texture_color_F(t_texture *texture);
+void	set_texture_color_C(t_texture *texture);
+
+//str_utils.c
 bool	strevery(int (*func)(int c),  const char *str);
 bool	is_empty_line(char *line);
-t_err	prepare_map_init(t_map *map, char *path);
 void	strr_arr_dispose(char **arr);
-t_err map_control(t_map *map);
-t_err	map_H(t_map *map);
-t_err	control_reachable_player(t_map *map);
-t_err map_control_part(t_map *map);
-t_err validate_map(char **map);
-
-
 
 
 #endif

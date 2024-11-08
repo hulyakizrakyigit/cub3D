@@ -7,7 +7,7 @@ BUILD_DIR		= build
 BIN_DIR			= $(BUILD_DIR)/bin
 INC_DIR			= -Iinc -I$(MLX_DIR) -I$(LIBFT_DIR)
 NAME				= $(BIN_DIR)/$(PROGRAM)
-SRCS				= $(SRC_DIR)/err.c $(SRC_DIR)/init.c $(SRC_DIR)/init_texture.c $(SRC_DIR)/set_texture.c $(SRC_DIR)/str_utils.c
+SRCS				= $(SRC_DIR)/err.c $(SRC_DIR)/init.c $(SRC_DIR)/init_texture.c $(SRC_DIR)/set_texture.c $(SRC_DIR)/str_utils.c $(SRC_DIR)/control_map_items.c $(SRC_DIR)/control_map.c $(SRC_DIR)/helper.c 
 
 
 

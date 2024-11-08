@@ -45,7 +45,7 @@ int main(int ac, char **av)
 		free(game);
 		return (1);
 	}
-	err = control_reachable_player(&game->map);
+	err = control_player(&game->map);
 	if (err != OK)
 	{
 		perr(__func__, "control_reachable_player failed");
