@@ -57,7 +57,7 @@ t_err	is_invalid_color(char **rgb_str_arr)
 	while (rgb_str_arr[i])
 	{
 		rgb_str_arr[i] = ft_strtrim(rgb_str_arr[i], "\t\v\f\r\n ");
-		if (!strevery(&ft_isdigit, rgb_str_arr[i]))
+		if (!strevery(&ft_isdigit, rgb_str_arr[i]) || (rgb_str_arr[i][0] == '\0' && ft_strlen(rgb_str_arr[i]) == 0))
 			return (perr(__func__, "Invalid color, not digit"));
 		i++;
 	}

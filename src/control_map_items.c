@@ -115,11 +115,6 @@ t_err map_H(t_map *map)
 		i++;
 	}
 	map->map_H[i] = NULL;
-	while (map->map_H[i])
-	{
-		printf("i: %d %s\n",i, map->map_H[i]);
-		i++;
-	}
 	i = 0;
 	while (i < map->map_len - map->row)
 	{
@@ -135,12 +130,6 @@ t_err map_H(t_map *map)
 		}
 		i++;
 	}
-	i = 0;
-	while (map->map_H[i])
-	{
-		printf("%s\n", map->map_H[i]);
-		i++;
-	}
 	return (OK);
 }
 
@@ -151,8 +140,6 @@ t_err	control_player(t_map *map)
 
 	i = 0;
 	j = 0;
-	printf("player x: %d\n", map->player.x);
-	printf("player y: %d\n", map->player.y);
 	if (map->player.x == 0 || map->player.y == 0)
 		return (perr(__func__, "Invalid player position"));
 	if (map->map_H[map->player.x][map->player.y - 1] == '1' && map->map_H[map->player.x][map->player.y + 1] == '1'&& map->map_H[map->player.x - 1][map->player.y] == '1' && map->map_H[map->player.x + 1][map->player.y] == '1')
