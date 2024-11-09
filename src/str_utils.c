@@ -30,15 +30,4 @@ bool	is_empty_line(char *line)
 	return (0);
 }
 
-void	strr_arr_dispose(char **arr)
-{
-	int i;
 
-	i = 0;
-	while (arr[i])
-	{
-		free(arr[i]);
-		i++;
-	}
-	free(arr);
-}

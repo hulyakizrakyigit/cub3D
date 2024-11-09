@@ -117,6 +117,9 @@ void	set_texture_color_C(t_texture *texture);
 //str_utils.c
 bool	strevery(int (*func)(int c),  const char *str);
 bool	is_empty_line(char *line);
+
+//dispose.c
+void	dispose(t_game *game);
 void	strr_arr_dispose(char **arr);
 
 
