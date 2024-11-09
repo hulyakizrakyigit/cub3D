@@ -3,10 +3,12 @@
 
 # include "../lib/libft/libft.h"
 # include "../lib/libft/get_next_line/get_next_line.h"
+# include "mlx.h"
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 #include <stdbool.h>
+
 
 typedef enum e_err
 {
@@ -69,9 +71,19 @@ typedef struct s_map
 	t_player player;
 } t_map;
 
+typedef struct s_image
+{
+	void	*east;
+	void	*north;
+	void	*south;
+	void	*west;
+}	t_image;
 typedef struct s_game
 {
 	t_map	map;
+	void	*win_ptr;
+	void	*mlx;
+	t_image	image;
 
 } t_game;
 
@@ -122,5 +134,12 @@ bool	is_empty_line(char *line);
 void	dispose(t_game *game);
 void	strr_arr_dispose(char **arr);
 
+//
+t_err init_mlx(t_game *game);
+int close_window(t_game *game);
+int esc_press(int keycode, t_game *game);
+
+//
+t_err image_up(t_game *game);
 
 #endif
