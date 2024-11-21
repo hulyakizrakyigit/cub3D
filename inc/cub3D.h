@@ -4,17 +4,46 @@
 # include "../lib/libft/libft.h"
 # include "../lib/libft/get_next_line/get_next_line.h"
 # include "mlx.h"
+# include "vector.h"
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 #include <stdbool.h>
 
 
+#  define ESC_KEY 53
+#  define X_KEY 7
+#  define Z_KEY 6
+#  define O_KEY 31
+#  define Q_KEY 12
+#  define W_KEY 13
+#  define E_KEY 14
+#  define R_KEY 15
+#  define A_KEY 0
+#  define S_KEY 1
+#  define D_KEY 2
+#  define F_KEY 3
+#  define P_KEY 35
+#  define RIGHT_KEY 124
+#  define LEFT_KEY 123
+#  define UP_KEY 126
+#  define DOWN_KEY 125
+
+# define HEIGHT			1024
+# define WIDTH			1280
+
 typedef enum e_err
 {
 	OK = 0,
 	ERR = 1
 } t_err;
+
+
+typedef enum e_mlx_event
+{
+	KeyPress = 2,
+	KeyRelease = 3
+}	t_mlx_event;
 
 typedef struct s_img
 {
@@ -27,6 +56,15 @@ typedef struct s_img
 	int 	count;
 } t_img;
 
+typedef struct s_image
+{
+	void	*img;
+	t_color	*data;
+	int		bits_per_pixel;
+	int		size_line;
+	int		line_count;
+	int		endian;
+}	t_image;
 typedef struct s_color
 {
 	int R;
@@ -50,12 +88,28 @@ typedef struct s_texture
 } t_texture;
 
 
+typedef union u_vec2
+{
+	struct
+	{
+		float	x;
+		float	y;
+	};
+	float	data[2];
+}	t_vec;
+
 typedef struct s_player
 {
-	int x;
-	int y;
-	char direction;
-} t_player;
+	int		x;
+	int		y;
+	char	direction;
+	float	move_speed;
+	float	camera_speed;
+	t_vec	pos;
+	t_vec	dir;
+	t_vec	plane;
+}	t_player;
+
 typedef struct s_map
 {
 	char	**map;
@@ -71,19 +125,21 @@ typedef struct s_map
 	t_player player;
 } t_map;
 
-typedef struct s_image
-{
-	void	*east;
-	void	*north;
-	void	*south;
-	void	*west;
-}	t_image;
+
+
 typedef struct s_game
 {
 	t_map	map;
 	void	*win_ptr;
 	void	*mlx;
-	t_image	image;
+	int		win_height;
+	int		win_width;
+	int		time;
+	t_image	north;
+	t_image	south;
+	t_image	west;
+	t_image	east;
+	t_moves moves;
 
 } t_game;
 
@@ -135,11 +191,17 @@ void	dispose(t_game *game);
 void	strr_arr_dispose(char **arr);
 
 //
-t_err init_mlx(t_game *game);
-int close_window(t_game *game);
-int esc_press(int keycode, t_game *game);
+t_err init_mlx_and_game(t_game *game);
+
 
 //
 t_err image_up(t_game *game);
+
+//key_hook.c
+int key_press_handler(int key_code, t_game *game);
+int key_release_handler(int keycode, t_game *game);
+int close_window(t_game *game);
+int esc_press(int keycode, t_game *game);
+
 
 #endif
