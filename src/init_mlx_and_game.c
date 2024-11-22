@@ -12,27 +12,64 @@ void init_player(t_game *game)
         game->map.player.dir = (t_vec){.x = 1.0, .y = 0.0};
     game->map.player.pos = (t_vec){.x = game->map.player.x + 0.5, .y = game->map.player.y + 0.5};
 }
-void	init_variables(t_game *game)
-{
 
+void	init_var(t_game *game)
+{
+    game->moves = (t_moves){0};
+    game->player.pos.x = 4.5;
+    game->player.pos.y = 5.5;
+    game->player.dir.x = 0.0;
+    game->player.dir.y = 1.0;
+    game->texture.EA = (t_img){0};
+    game->texture.NO = (t_img){0};
+    game->texture.SO = (t_img){0};
+    game->texture.WE = (t_img){0};
+    game->texture.F = (t_color){0};
+    game->texture.C = (t_color){0};
+    game->map.player_count = 0;
 }
-
-t_err init_mlx_and_game(t_game *game)
+void    init_win(t_game *game)
 {
-    init_var(&game)
-    init_player(&game);
-    game->map.player.move_speed = 0.2; //0.2;
-    game->map.player.camera_speed = 3; //3;
+    game->win_height = HEIGHT;
+    game->win_width = WIDTH;
     game->mlx = mlx_init();
     if (!game->mlx)
-        return (perr(__func__, "mlx init failed!"));
-    game->win_ptr = mlx_new_window(game->mlx, 800, 600, "cub3D");
+        // return (perr(__func__, "mlx init failed!"));
+        printf("mlx init failed!\n");
+        exit(1);
+    //dispose and exit?
+    game->win_ptr = mlx_new_window(game->mlx, WIDTH, HEIGHT, "cub3D");
     if (!game->win_ptr)
     {
         free(game->mlx);
-        return (perr(__func__, "mlx new window failed!"));
+        //dispose and exit?
+        // return (perr(__func__, "mlx new window failed!"));
+        printf("mlx new window failed!\n");
+        exit(1);
     }
-    return (OK);
+    game->mlx_img = mlx_new_image(game->mlx, WIDTH, HEIGHT);
+    game->mlx_pixels = mlx_get_data_addr(game->mlx_img, &game->mlx_byte_order, &game->mlx_row_size, &game->mlx_line_count);
+    if (!game->mlx_img || !game->mlx_pixels)
+    {
+        mlx_destroy_window(game->mlx, game->win_ptr);
+        free(game->mlx);
+        //dispose and exit?
+        // return (perr(__func__, "mlx new image failed!"));
+        printf("mlx new image failed!\n");
+        exit(1);
+    }
+    game->mlx_row_size /= game->mlx_line_count / 8; // 4?
+}
+
+void init_mlx_and_game(t_game *game)
+{
+    init_var(game);
+    init_player(game);
+    game->map.player.move_speed = 0.2; //0.2;
+    game->map.player.camera_speed = 3; //3;
+    init_win(game);
+    mlx_put_image_to_window(game->mlx, game->win_ptr, game->mlx_img, 0, 0);
+	mlx_do_key_autorepeatoff(game->mlx);
 }
 
 

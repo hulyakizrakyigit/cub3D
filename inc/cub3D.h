@@ -4,7 +4,6 @@
 # include "../lib/libft/libft.h"
 # include "../lib/libft/get_next_line/get_next_line.h"
 # include "mlx.h"
-# include "vector.h"
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
@@ -38,6 +37,34 @@ typedef enum e_err
 	ERR = 1
 } t_err;
 
+typedef enum e_bool
+{
+	error = -1,
+	my_false,
+	my_true
+}	t_bool;
+
+typedef union u_color_p
+{
+	struct
+	{
+		unsigned char	blue;
+		unsigned char	green;
+		unsigned char	red;
+		unsigned char	alpha;
+	};
+	unsigned int	value;
+}	t_color_p;
+typedef struct s_moves
+{
+	t_bool	esc;
+	t_bool	w;
+	t_bool	a;
+	t_bool	s;
+	t_bool	d;
+	t_bool	right;
+	t_bool	left;
+}	t_moves;
 
 typedef enum e_mlx_event
 {
@@ -45,31 +72,25 @@ typedef enum e_mlx_event
 	KeyRelease = 3
 }	t_mlx_event;
 
+
 typedef struct s_img
 {
 	void	*img;
-	char	*addr;
-	int		bpp;
-	int		line_length;
-	int		endian;
 	char 	*path;
-	int 	count;
-} t_img;
-
-typedef struct s_image
-{
-	void	*img;
-	t_color	*data;
-	int		bits_per_pixel;
-	int		size_line;
+	int		bpp;
+	int		row_size;
 	int		line_count;
-	int		endian;
-}	t_image;
+	int		byte_order;
+	int		count;
+	t_color_p	*pixels;
+}	t_img;
+
 typedef struct s_color
 {
 	int R;
 	int G;
 	int B;
+	int A;
 	int count;
 	char *rgb_str;
 	char **rgb_str_arr;
@@ -132,13 +153,16 @@ typedef struct s_game
 	t_map	map;
 	void	*win_ptr;
 	void	*mlx;
+	void 	*mlx_img;
+	void	*mlx_pixels;
 	int		win_height;
 	int		win_width;
+	int		mlx_row_size;
+	int		mlx_line_count;
+	int		mlx_byte_order;
 	int		time;
-	t_image	north;
-	t_image	south;
-	t_image	west;
-	t_image	east;
+	t_player player;
+	t_texture texture;
 	t_moves moves;
 
 } t_game;
@@ -191,7 +215,11 @@ void	dispose(t_game *game);
 void	strr_arr_dispose(char **arr);
 
 //
-t_err init_mlx_and_game(t_game *game);
+void init_mlx_and_game(t_game *game);
+void	init_var(t_game *game);
+void    init_win(t_game *game);
+void init_player(t_game *game);
+
 
 
 //

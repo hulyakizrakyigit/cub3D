@@ -61,11 +61,7 @@ int main(int ac, char **av)
 		return (dispose(game), 1);
 	}
 
-	if (init_mlx_and_game(game) != OK)
-	{
-		perr(__func__, "mlx init failed");
-		return (dispose(game), 1);
-	}
+	init_mlx_and_game(game);
 	mlx_hook(game->win_ptr, 17, 0, close_window, &game); //çarpı işaretinden kapanacak
     mlx_key_hook(game->win_ptr, esc_press, &game); //esc ile kapancak
 	mlx_hook(game->win_ptr, KeyPress, (1L << 0), key_press_handler, &game);
@@ -75,7 +71,7 @@ int main(int ac, char **av)
 		perr(__func__, "image up failed");
 		return (dispose(game), 1);
 	}
-	mlx_loop_hook(game->mlx, start_game, &game);
+	// mlx_loop_hook(game->mlx, start_game, &game);
 	mlx_loop(game->mlx);
 	return (dispose(game), 0);
 }
