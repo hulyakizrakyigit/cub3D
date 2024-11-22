@@ -160,7 +160,7 @@ typedef struct s_game
 	int		mlx_row_size;
 	int		mlx_line_count;
 	int		mlx_byte_order;
-	int		time;
+	double  time;
 	t_player player;
 	t_texture texture;
 	t_moves moves;
@@ -230,6 +230,9 @@ int key_press_handler(int key_code, t_game *game);
 int key_release_handler(int keycode, t_game *game);
 int close_window(t_game *game);
 int esc_press(int keycode, t_game *game);
+
+//start_game.c
+int	start_game(void *params);
 
 
 #endif
