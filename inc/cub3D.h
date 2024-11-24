@@ -31,7 +31,6 @@
 # define HEIGHT			1024
 # define WIDTH			1280
 
-# define PI 3.14159265359
 
 # define PLAYER_RADIUS 0.25
 
@@ -47,6 +46,20 @@ typedef enum e_bool
 	my_false,
 	my_true
 }	t_bool;
+
+typedef enum s_side
+{
+	North,
+	South,
+	West,
+	East
+} t_side;
+
+typedef struct s_collision
+{
+	t_vec point;
+	t_side side;
+} t_collision;
 
 typedef union u_color_p
 {
@@ -164,6 +177,8 @@ typedef struct s_game
 	int		mlx_byte_order;
 	double  time; //control
 	int		ray_count;
+	float	ray_angles[WIDTH];
+	t_collision collisions[WIDTH];
 	t_player player;
 	t_texture texture;
 	t_moves moves;
