@@ -55,6 +55,15 @@ typedef enum s_side
 	East
 } t_side;
 
+typedef union u_vec2
+{
+	struct
+	{
+		float	x;
+		float	y;
+	};
+	float	data[2];
+}	t_vec;
 typedef struct s_collision
 {
 	t_vec point;
@@ -125,15 +134,6 @@ typedef struct s_texture
 
 } t_texture;
 
-typedef union u_vec2
-{
-	struct
-	{
-		float	x;
-		float	y;
-	};
-	float	data[2];
-}	t_vec;
 
 typedef struct s_player
 {
@@ -251,6 +251,19 @@ int esc_press(int keycode, t_game *game);
 
 //start_game.c
 int	start_game(void *params);
+t_vec	normalize_vec(t_vec vec);
+t_vec rotate_vec(t_vec vec, float angle);
+t_vec inversion_vec(t_vec vec);
+void	handle_camera(t_game *game, t_bool rotate);
+t_vec add_vec(t_vec vec1, t_vec vec2);
+t_vec scale_vec(t_vec vec, float scale);
+void check_player_collision(t_game *game, t_vec next_position); // player_radius
+void handle_movement(t_game *game, t_vec move_vec);
+void	handle_player(t_game *game);
+float rad_to_deg(float angle);
+void raycasting(t_game *game, t_vec pos, t_vec vec, t_collision *collision);
+void	handle_ray(t_game *game);
+
 
 
 #endif

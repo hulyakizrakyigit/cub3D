@@ -91,10 +91,10 @@ float rad_to_deg(float angle)
 	return (angle * 180 / M_PI);
 }
 
-void raycasting(t_game *game, t_vec ray, t_collision *collision)
-{
+// void raycasting(t_game *game, t_vec pos, t_vec vec, t_collision *collision)
+// {
 
-}
+// }
 
 void	handle_ray(t_game *game)
 {
@@ -109,7 +109,7 @@ void	handle_ray(t_game *game)
 	{
 		game->ray_angles[i] = rad_to_deg(atan(angle_offset / WIDTH));
 		rotated = rotate_vec(game->player.dir, game->ray_angles[i]);
-		raycasting(game, rotated, &game->collisions[i]);
+		//raycasting(game, game->player.pos, rotated, &game->collisions[i]);
 		angle_offset += 1;
 		i++;
 	}
