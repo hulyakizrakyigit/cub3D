@@ -86,6 +86,22 @@ void	handle_player(t_game *game)
 	handle_movement(game, move_vec);
 }
 
+void	handle_ray(t_game *game)
+{
+	int i;
+	float ray_angle;
+
+	game->ray_count = WIDTH;
+	ray_angle = -(WIDTH / 2);
+	i = 0;
+	while (i < game->ray_count)
+	{
+
+		ray_angle += 1;
+		i++;
+	}
+}
+
 int	start_game(void *params)
 {
 	char *fps;
@@ -98,6 +114,7 @@ int	start_game(void *params)
 	old_time = curr_time;
 
 	handle_player(game);
+	handle_ray(game);
 
 
 	fps = ft_itoa((int)(1 / game->time));

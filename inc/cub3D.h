@@ -162,7 +162,8 @@ typedef struct s_game
 	int		mlx_row_size;
 	int		mlx_line_count;
 	int		mlx_byte_order;
-	double  time;
+	double  time; //control
+	int		ray_count;
 	t_player player;
 	t_texture texture;
 	t_moves moves;
