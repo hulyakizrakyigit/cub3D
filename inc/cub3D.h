@@ -31,6 +31,10 @@
 # define HEIGHT			1024
 # define WIDTH			1280
 
+# define PI 3.14159265359
+
+# define PLAYER_RADIUS 0.25
+
 typedef enum e_err
 {
 	OK = 0,
@@ -55,6 +59,7 @@ typedef union u_color_p
 	};
 	unsigned int	value;
 }	t_color_p;
+
 typedef struct s_moves
 {
 	t_bool	esc;
@@ -71,7 +76,6 @@ typedef enum e_mlx_event
 	KeyPress = 2,
 	KeyRelease = 3
 }	t_mlx_event;
-
 
 typedef struct s_img
 {
@@ -108,7 +112,6 @@ typedef struct s_texture
 
 } t_texture;
 
-
 typedef union u_vec2
 {
 	struct
@@ -135,18 +138,17 @@ typedef struct s_map
 {
 	char	**map;
 	char	**map_H;
-	t_texture texture;
 	char	*path;
 	int		row;
 	int 	map_len;
 	int 	map_width;
 	int 	map_start;
 	int 	map_end;
+	int 	map_height;
 	int 	player_count;
+	t_texture texture;
 	t_player player;
 } t_map;
-
-
 
 typedef struct s_game
 {
