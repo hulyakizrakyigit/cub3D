@@ -91,10 +91,174 @@ float rad_to_deg(float angle)
 	return (angle * 180 / M_PI);
 }
 
-// void raycasting(t_game *game, t_vec pos, t_vec vec, t_collision *collision)
-// {
+void	init_ray(t_raycast *ray, t_vec origin, t_vec vec, char axis)
+{
+	if (axis == 'x')
+	{
+		if (vec.x > 0)
+		{
+			ray->curr_pos.x = (int)origin.x + 1;
+			ray->grid_step = 1;
+			ray->map_offset = 0;
+		}
+		else
+		{
+			ray->curr_pos.x = (int)origin.x;
+			ray->grid_step = -1;
+			ray->map_offset = -1;
+		}
+		ray->ray_unit_step_x = 1.0 / fabs(vec.x);
+	}
+	else
+	{
+		if (vec.y > 0)
+		{
+			ray->curr_pos.y = (int)origin.y + 1;
+			ray->grid_step = 1;
+			ray->map_offset = 0;
+		}
+		else
+		{
+			ray->curr_pos.y = (int)origin.y;
+			ray->grid_step = -1;
+			ray->map_offset = -1;
+		}
+		ray->ray_unit_step_y = 1.0 / fabs(vec.y);
+	}
+}
 
+float	vec_magnitude(t_vec vec1, t_vec vec2)
+{
+	return (sqrt(pow(vec1.x - vec2.x, 2) + pow(vec1.y - vec2.y, 2)));
+}
+// t_vec	cal_vertical_hit(t_game *game, t_vec origin, t_vec vec, float *vertical_distance)
+// {
+// 	t_raycast ray_v;
+
+// 	if (vec.x == 0) // Bölme hatasını önle
+// 		return ((t_vec){.x = -1, .y = -1});
+
+// 	init_ray(&ray_v, origin, vec, 'x');
+// 	while (ray_v.curr_pos.x >= 0 && ray_v.curr_pos.x < game->map.map_width)
+// 	{
+// 		ray_v.curr_pos.y = (vec.y / vec.x) * (ray_v.curr_pos.x - origin.x) + origin.y;
+// 		if (ray_v.curr_pos.y < 0 || ray_v.curr_pos.y >= game->map.map_height) // Sınır kontrolü
+// 			break;
+
+// 		ray_v.collision.pos = (t_vec){.x = ray_v.curr_pos.x, .y = ray_v.curr_pos.y};
+// 		if (game->map.map[(int)ray_v.curr_pos.y][(int)ray_v.curr_pos.x] == '1')
+// 		{
+// 			*vertical_distance = vec_magnitude(origin, ray_v.collision.pos);
+// 			return (ray_v.collision.pos);
+// 		}
+
+// 		ray_v.curr_pos.x += ray_v.grid_step;
+// 	}
+// 	return ((t_vec){.x = -1, .y = -1});
 // }
+
+// t_vec	cal_horizontal_hit(t_game *game, t_vec origin, t_vec vec, float *horizontal_distance)
+// {
+// 	t_raycast ray_h;
+
+// 	if (vec.y == 0) // Bölme hatasını önle
+// 		return ((t_vec){.x = -1, .y = -1});
+
+// 	init_ray(&ray_h, origin, vec, 'y');
+// 	while (ray_h.curr_pos.y >= 0 && ray_h.curr_pos.y < game->map.map_height)
+// 	{
+// 		ray_h.curr_pos.x = (vec.x / vec.y) * (ray_h.curr_pos.y - origin.y) + origin.x;
+// 		if (ray_h.curr_pos.x < 0 || ray_h.curr_pos.x >= game->map.map_width) // Sınır kontrolü
+// 			break;
+
+// 		ray_h.collision.pos = (t_vec){.x = ray_h.curr_pos.x, .y = ray_h.curr_pos.y};
+// 		if (game->map.map[(int)ray_h.curr_pos.y][(int)ray_h.curr_pos.x] == '1')
+// 		{
+// 			*horizontal_distance = vec_magnitude(origin, ray_h.collision.pos);
+// 			return (ray_h.collision.pos);
+// 		}
+
+// 		ray_h.curr_pos.y += ray_h.grid_step;
+// 	}
+// 	return ((t_vec){.x = -1, .y = -1});
+// }
+
+t_vec	cal_vertical_hit(t_game *game, t_vec origin, t_vec vec, float *vertical_distance)
+{
+	t_raycast ray_v;
+	if (vec.x == 0)
+		return ((t_vec){.x = -1, .y = -1}); //0,0 bölme hatası
+	init_ray(&ray_v, origin, vec, 'x');
+	while (ray_v.curr_pos.x >= 0 && ray_v.curr_pos.x < game->map.map_width)
+	{
+		ray_v.curr_pos.y = (vec.y / vec.x) * (ray_v.curr_pos.x - origin.x) + origin.y;
+		if (ray_v.curr_pos.y < 0 || ray_v.curr_pos.y >= game->map.map_height)
+			break ;
+		ray_v.collision.pos = (t_vec){.x = ray_v.curr_pos.x, .y = ray_v.curr_pos.y};
+		*vertical_distance = vec_magnitude(origin, ray_v.collision.pos);
+		if (*vertical_distance >= game->max_view_distance)
+			break ;
+		if (ray_v.curr_pos.y >= 0 && ray_v.curr_pos.y < game->map.map_height)
+		{
+			if (game->map.map[(int)ray_v.curr_pos.y][(int)ray_v.curr_pos.x] == '1')
+				return (ray_v.collision.pos);
+		}
+		ray_v.curr_pos.x += ray_v.grid_step;
+	}
+	return ((t_vec){.x = -1, .y = -1}); //0,0
+}
+
+t_vec	cal_horizontal_hit(t_game *game, t_vec origin, t_vec vec, float *horizontal_distance)
+{
+	t_raycast ray_h;
+	init_ray(&ray_h, origin, vec, 'y');
+	if (vec.y == 0) // 0'a bölme hatası
+		return ((t_vec){.x = -1, .y = -1}); //0,0
+	while (ray_h.curr_pos.y >= 0 && ray_h.curr_pos.y < game->map.map_height)
+	{
+		ray_h.curr_pos.x = (vec.x / vec.y) * (ray_h.curr_pos.y - origin.y) + origin.x;
+		ray_h.collision.pos = (t_vec){.x = ray_h.curr_pos.x, .y = ray_h.curr_pos.y};
+		*horizontal_distance = vec_magnitude(origin, ray_h.collision.pos);
+		if (*horizontal_distance >= game->max_view_distance)
+			break ;
+		if (ray_h.curr_pos.x >= 0 && ray_h.curr_pos.x < game->map.map_width)
+		{
+			if (game->map.map[(int)ray_h.curr_pos.y][(int)ray_h.curr_pos.x] == '1')
+				return (ray_h.collision.pos);
+		}
+		ray_h.curr_pos.y += ray_h.grid_step;
+	}
+	return ((t_vec){.x = -1, .y = -1}); //0,0
+}
+
+void raycasting(t_game *game, t_vec origin, t_vec vec, t_collision *collision)
+{
+	t_vec vertical_hit;
+	t_vec horizontal_hit;
+	float vertical_distance;
+	float horizontal_distance;
+
+	vertical_distance = 0;
+	horizontal_distance = 0;
+	vertical_hit = cal_vertical_hit(game, origin, vec, &vertical_distance);
+	horizontal_hit = cal_horizontal_hit(game, origin, vec, &horizontal_distance);
+	if (horizontal_distance < vertical_distance)
+	{
+		collision->pos = horizontal_hit;
+		if (origin.y < horizontal_hit.y)
+			collision->side = North;
+		else
+			collision->side = South;
+	}
+	else
+	{
+		collision->pos = vertical_hit;
+		if (origin.x < vertical_hit.x)
+			collision->side = West;
+		else
+			collision->side = East;
+	}
+}
 
 void	handle_ray(t_game *game)
 {
@@ -109,7 +273,7 @@ void	handle_ray(t_game *game)
 	{
 		game->ray_angles[i] = rad_to_deg(atan(angle_offset / WIDTH));
 		rotated = rotate_vec(game->player.dir, game->ray_angles[i]);
-		//raycasting(game, game->player.pos, rotated, &game->collisions[i]);
+		raycasting(game, game->player.pos, rotated, &game->collisions[i]);
 		angle_offset += 1;
 		i++;
 	}

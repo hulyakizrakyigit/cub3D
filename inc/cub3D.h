@@ -66,7 +66,7 @@ typedef union u_vec2
 }	t_vec;
 typedef struct s_collision
 {
-	t_vec point;
+	t_vec pos;
 	t_side side;
 } t_collision;
 
@@ -98,6 +98,19 @@ typedef enum e_mlx_event
 	KeyPress = 2,
 	KeyRelease = 3
 }	t_mlx_event;
+
+typedef struct s_raycast
+{
+	t_vec curr_pos;
+	t_vec dir;
+	t_vec plane;
+	t_collision collision;
+	float distance;
+	double ray_unit_step_x;
+	double ray_unit_step_y;
+	int	map_offset;
+	int	grid_step;
+}	t_raycast;
 
 typedef struct s_img
 {
@@ -175,6 +188,7 @@ typedef struct s_game
 	int		mlx_row_size;
 	int		mlx_line_count;
 	int		mlx_byte_order;
+	float	max_view_distance;
 	double  time; //control
 	int		ray_count;
 	float	ray_angles[WIDTH];
