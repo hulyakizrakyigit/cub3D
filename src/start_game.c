@@ -334,7 +334,7 @@ int	start_game(void *params)
 	handle_player(game);
 	handle_ray(game);
 
-	draw_bg(game);
+	draw_background(game);
 
 
 	fps = ft_itoa((int)(1 / game->time));

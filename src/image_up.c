@@ -30,12 +30,3 @@ t_err image_up(t_game *game)
 //mlx_get_data_addr, bir görüntünün (örneğin bir XPM dosyası) bellekteki piksel verilerine doğrudan erişim sağlar.
 //bir dizi (texture->data) olarak düzenlenir ve her pikselin rengi, genellikle ARGB (Alpha, Red, Green, Blue) formatında, bir t_color ya da benzeri bir yapıyla temsil edilir.
 //texture->data, her bir pikselin bellek adresini içerir. Böylece görüntünün ham bitlerine erişebilirsiniz.
-
-void background_color_init(t_game *game)
-{
-        game->texture.F.color.alpha = (game->texture.F.A);
-        game->texture.F.color.green = (game->texture.F.G);
-        game->texture.F.color.blue = (game->texture.F.B);
-        game->texture.F.color.red = (game->texture.F.R);
-
-}
