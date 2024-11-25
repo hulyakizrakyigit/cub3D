@@ -279,6 +279,47 @@ void	handle_ray(t_game *game)
 	}
 }
 
+void	ft_put_pixel(t_game *game, int x, int y, t_color_p color)
+{
+	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 0] = color.blue;   // Blue
+	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 1] = color.green;  // Green
+	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 2] = color.red;    // Red
+	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 3] = color.alpha;  // Alpha
+}
+
+void	draw_background(t_game *game)
+{
+	int	i;
+	int	j;
+	t_color_p c_color;
+	t_color_p f_color;
+
+	c_color.alpha = 0;
+	c_color.red = (unsigned char)(game->texture.C.R);
+	c_color.green = (unsigned char)(game->texture.C.G);
+	c_color.blue = (unsigned char)(game->texture.C.B);
+
+	f_color.alpha = 0;
+	f_color.red = (unsigned char)(game->texture.F.R);
+	f_color.green = (unsigned char)(game->texture.F.G);
+	f_color.blue = (unsigned char)(game->texture.F.B);
+
+	i = 0;
+	while (i < HEIGHT)
+	{
+		j = 0;
+		while (j < WIDTH)
+		{
+			if (i < HEIGHT / 2)
+				ft_put_pixel(game, j, i, c_color);
+			else
+				ft_put_pixel(game, j, i, f_color);
+			j++;
+		}
+		i++;
+	}
+}
+
 int	start_game(void *params)
 {
 	char *fps;
@@ -292,6 +333,8 @@ int	start_game(void *params)
 
 	handle_player(game);
 	handle_ray(game);
+
+	draw_bg(game);
 
 
 	fps = ft_itoa((int)(1 / game->time));

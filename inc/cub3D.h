@@ -133,7 +133,6 @@ typedef struct s_color
 	int count;
 	char *rgb_str;
 	char **rgb_str_arr;
-
 } t_color;
 
 typedef struct s_texture
@@ -182,7 +181,7 @@ typedef struct s_game
 	void	*win_ptr;
 	void	*mlx;
 	void 	*mlx_img;
-	void	*mlx_pixels;
+	char	*mlx_pixels;
 	int		win_height;
 	int		win_width;
 	int		mlx_row_size;
