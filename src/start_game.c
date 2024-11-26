@@ -319,6 +319,134 @@ void	draw_background(t_game *game)
 		i++;
 	}
 }
+static t_color_p get_texture_color(t_img *texture, float tex_x, float tex_y)
+{
+	int tex_pos_x;
+	int tex_pos_y;
+
+	tex_pos_x = (int)(tex_x * texture->row_size);
+	tex_pos_y = (int)(tex_y) * texture->row_size;
+	return texture->pixels[tex_pos_y + tex_pos_x];
+}
+
+static void draw_wall_column(t_game *game, t_draw_params *params, int start_y, int end_y)
+{
+	int y;
+	float tex_y;
+	t_color_p color;
+
+	y = start_y;
+	while (y < end_y)
+	{
+		// Y eksenindeki doku koordinatını hesapla
+		tex_y = ((y - start_y) / params->wall_height) * params->texture->line_count;
+
+		// Doku piksel rengini al
+		color = get_texture_color(params->texture, params->tex_x, tex_y);
+
+		// Pikselleri ekrana çiz
+		game->mlx_pixels[(y * game->mlx_row_size + params->column_index) * 4 + 0] = color.blue;
+		game->mlx_pixels[(y * game->mlx_row_size + params->column_index) * 4 + 1] = color.green;
+		game->mlx_pixels[(y * game->mlx_row_size + params->column_index) * 4 + 2] = color.red;
+		game->mlx_pixels[(y * game->mlx_row_size + params->column_index) * 4 + 3] = color.alpha;
+		y++;
+	}
+}
+
+void	draw_side(t_game *game, int i, float wall_height, float tex_x, t_side side)
+{
+	t_img *texture;
+	int start_y;
+	int end_y;
+	t_draw_params params;
+
+	if (side == North)
+		texture = &game->texture.NO;
+	else if (side == South)
+		texture = &game->texture.SO;
+	else if (side == West)
+		texture = &game->texture.WE;
+	else
+		texture = &game->texture.EA;
+
+	start_y = (HEIGHT - wall_height) / 2;
+	if (start_y < 0)
+		start_y = 0;
+	end_y = (HEIGHT + wall_height) / 2;
+	if (end_y >= HEIGHT)
+		end_y = HEIGHT;
+	params.texture = texture;
+	params.wall_height = wall_height;
+	params.tex_x = tex_x;
+	params.column_index = i;
+	draw_wall_column(game, &params, start_y, end_y);
+}
+
+void	draw_single_wall(t_game *game, float wall_height, int i, t_side side)
+{
+	t_vec collision_pos;
+	float tex_x;
+
+	collision_pos = game->collisions[i].pos;
+	if (side == North)
+	{
+		tex_x = collision_pos.x - (int)collision_pos.x;
+		draw_side(game, i, wall_height, tex_x, North);
+	}
+	else if (side == South)
+	{
+		tex_x = collision_pos.x - (int)collision_pos.x;
+		draw_side(game, i, wall_height, tex_x, South);
+	}
+	else if (side == West)
+	{
+		tex_x = collision_pos.y - (int)collision_pos.y;
+		draw_side(game, i, wall_height, tex_x, West);
+	}
+	else
+	{
+		tex_x = collision_pos.y - (int)collision_pos.y;
+		draw_side(game, i, wall_height, tex_x, East);
+	}
+}
+
+bool	is_zero_vec(t_vec vec)
+{
+	return (fabs(vec.x) < 0.001 && fabs(vec.y) < 0.001);
+}
+
+float	deg_to_rad(float degree)
+{
+	return ((degree / 180) * M_PI);
+}
+
+void	draw_walls(t_game *game)
+{
+	int	i;
+	float distance;
+	float wall_height;
+	t_vec collision_pos;
+
+	i = 0;
+	while (i < game->ray_count)
+	{
+		collision_pos = game->collisions[i].pos;
+		if (is_zero_vec(collision_pos))
+		{
+			i++;
+			continue ;
+		}
+		distance = vec_magnitude(game->player.pos, collision_pos);
+		if (distance <= 0)
+		{
+			i++;
+			continue ;
+		}
+		wall_height =  HEIGHT / (distance * cos(deg_to_rad(game->ray_angles[i]))); //duvarın yüksekliği = ekran yüksekliği / (düzeltilmiş mesafe)
+		draw_single_wall(game, wall_height, i, game->collisions[i].side);
+		i++;
+	}
+}
 
 int	start_game(void *params)
 {
@@ -335,8 +463,8 @@ int	start_game(void *params)
 	handle_ray(game);
 
 	draw_background(game);
-
-
+	draw_walls(game);
+	mlx_put_image_to_window(game->mlx, game->win_ptr, game->mlx_img, 0, 0);
 	fps = ft_itoa((int)(1 / game->time));
 	mlx_string_put(game->mlx, game->win_ptr, HEIGHT, WIDTH, 0x00FF0000, fps); // 0x00FF0000??
 	free(fps);

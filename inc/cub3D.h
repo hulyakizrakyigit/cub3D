@@ -55,6 +55,7 @@ typedef enum s_side
 	East
 } t_side;
 
+
 typedef union u_vec2
 {
 	struct
@@ -123,6 +124,14 @@ typedef struct s_img
 	int		count;
 	t_color_p	*pixels;
 }	t_img;
+
+typedef struct s_draw_params
+{
+	t_img	*texture;// Doku
+	float	wall_height; // Duvar yüksekliği
+	float	tex_x; // X eksenindeki doku koordinatı
+	int 	 column_index;// Ekrandaki sütun (ray) indeksi
+} t_draw_params;
 
 typedef struct s_color
 {
