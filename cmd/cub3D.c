@@ -66,6 +66,7 @@ int main(int ac, char **av)
 		i++;
 	game->map.map_height = i;
 	game->max_view_distance = sqrt(pow(game->map.map_width, 2) + pow(game->map.map_height, 2));
+    init_var(game);
 	init_mlx_and_game(game);
 	mlx_hook(game->win_ptr, 17, 0, close_window, &game); //çarpı işaretinden kapanacak
     mlx_key_hook(game->win_ptr, esc_press, &game); //esc ile kapancak
@@ -76,7 +77,7 @@ int main(int ac, char **av)
 		perr(__func__, "image up failed");
 		return (dispose(game), 1);
 	}
-	mlx_loop_hook(game->mlx, start_game, &game);
+	mlx_loop_hook(game->mlx, start_game, game);
 	mlx_loop(game->mlx);
 	return (dispose(game), 0);
 }

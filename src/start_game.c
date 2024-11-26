@@ -70,18 +70,16 @@ void handle_movement(t_game *game, t_vec move_vec)
 
 void	handle_player(t_game *game)
 {
-	t_moves moves;
 	t_vec move_vec;
 	t_bool rotate;
 	float player_angle;
 
-	moves = game->moves;
-	move_vec = (t_vec){.x = moves.a + moves.d, .y = moves.w + moves.s}; // hareket vektörünü oluştur
+	move_vec = (t_vec){.x = (game->moves)->a + (game->moves)->d, .y = (game->moves)->w + (game->moves)->s}; // hareket vektörünü oluştur
 	move_vec = normalize_vec(move_vec); // vektörü normalize et
 	player_angle = (-atan2(game->player.dir.x, game->player.dir.y));
 	move_vec = rotate_vec(move_vec, player_angle);
 	move_vec = inversion_vec(move_vec);
-	rotate = moves.left + moves.right;
+	rotate = (game->moves)->left + (game->moves)->right;
 	handle_camera(game, rotate);
 	handle_movement(game, move_vec);
 }
@@ -458,12 +456,12 @@ int	start_game(void *params)
 	gettimeofday(&curr_time, NULL);
 	game->time = (double)(curr_time.tv_sec - old_time.tv_sec) + (double)(curr_time.tv_usec - old_time.tv_usec) / 1000000;
 	old_time = curr_time;
-
 	handle_player(game);
 	handle_ray(game);
 
 	draw_background(game);
 	draw_walls(game);
+	perror("handle_player");
 	mlx_put_image_to_window(game->mlx, game->win_ptr, game->mlx_img, 0, 0);
 	fps = ft_itoa((int)(1 / game->time));
 	mlx_string_put(game->mlx, game->win_ptr, HEIGHT, WIDTH, 0x00FF0000, fps); // 0x00FF0000??

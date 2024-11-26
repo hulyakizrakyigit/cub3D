@@ -15,7 +15,14 @@ void init_player(t_game *game)
 
 void	init_var(t_game *game)
 {
-    game->moves = (t_moves){0};
+    game->moves = (t_moves *)malloc(sizeof(t_moves));
+    game->moves->a = 0;
+    game->moves->s = 0;
+    game->moves->d = 0;
+    game->moves->w = 0;
+    game->moves->left = 0;
+    game->moves->right = 0;
+    game->moves->esc = 0;
     game->player.pos.x = 4.5;
     game->player.pos.y = 5.5;
     game->player.dir.x = 0.0;
@@ -30,13 +37,16 @@ void	init_var(t_game *game)
 }
 void    init_win(t_game *game)
 {
+
     game->win_height = HEIGHT;
     game->win_width = WIDTH;
     game->mlx = mlx_init();
     if (!game->mlx)
-        // return (perr(__func__, "mlx init failed!"));
+    {
         printf("mlx init failed!\n");
         exit(1);
+    }
+        // return (perr(__func__, "mlx init failed!"));
     //dispose and exit?
     game->win_ptr = mlx_new_window(game->mlx, WIDTH, HEIGHT, "cub3D");
     if (!game->win_ptr)
@@ -58,12 +68,11 @@ void    init_win(t_game *game)
         printf("mlx new image failed!\n");
         exit(1);
     }
-    game->mlx_row_size /= game->mlx_line_count / 8; // 4?
+    game->mlx_row_size /= 4;// 4 - 8?
 }
 
 void init_mlx_and_game(t_game *game)
 {
-    init_var(game);
     init_player(game);
     game->map.player.move_speed = 0.2; //0.2;
     game->map.player.camera_speed = 3; //3;

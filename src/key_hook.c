@@ -3,34 +3,34 @@
 int key_press_handler(int key_code, t_game *game)
 {
 	if (key_code == W_KEY)
-		game->moves.w = -1;
+		game->moves->w = -1;
 	else if (key_code == A_KEY)
-		game->moves.a = -1;
+		game->moves->a = -1;
 	else if (key_code == S_KEY)
-		game->moves.s = -1;
+		game->moves->s = -1;
 	else if (key_code == D_KEY)
-		game->moves.d = -1;
+		game->moves->d = -1;
 	else if (key_code == LEFT_KEY)
-		game->moves.left = -1;
+		game->moves->left = -1;
 	else if (key_code == RIGHT_KEY)
-		game->moves.right = -1;
+		game->moves->right = -1;
 	return (0);
 }
 
 int	key_release_handler(int keycode, t_game *game)
 {
 	if (keycode == W_KEY)
-		game->moves.w = 0;
+		game->moves->w = 0;
 	else if (keycode == A_KEY)
-		game->moves.a = 0;
+		game->moves->a = 0;
 	else if (keycode == S_KEY)
-		game->moves.s = 0;
+		game->moves->s = 0;
 	else if (keycode == D_KEY)
-		game->moves.d = 0;
+		game->moves->d = 0;
 	else if (keycode == LEFT_KEY)
-		game->moves.left = 0;
+		game->moves->left = 0;
 	else if (keycode == RIGHT_KEY)
-		game->moves.right = 0;
+		game->moves->right = 0;
 
 	return (0);
 }

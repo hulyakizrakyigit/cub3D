@@ -43,8 +43,8 @@ typedef enum e_err
 typedef enum e_bool
 {
 	error = -1,
-	my_false,
-	my_true
+	my_false = 0,
+	my_true = 1
 }	t_bool;
 
 typedef enum s_side
@@ -203,7 +203,7 @@ typedef struct s_game
 	t_collision collisions[WIDTH];
 	t_player player;
 	t_texture texture;
-	t_moves moves;
+	t_moves *moves;
 
 } t_game;
 
