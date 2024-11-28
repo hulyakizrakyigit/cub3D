@@ -184,22 +184,30 @@ float	vec_magnitude(t_vec vec1, t_vec vec2)
 t_vec	cal_vertical_hit(t_game *game, t_vec origin, t_vec vec, float *vertical_distance)
 {
 	t_raycast ray_v;
-	if (vec.x == 0)
-		return ((t_vec){.x = -1, .y = -1}); //0,0 bölme hatası
+	int map_x;
+	int map_y;
+  if (fabs(vec.x) < 0.0001) // Bölme hatasını önlemek için
+        return ((t_vec){.x = -1, .y = -1}); //0,0
 	init_ray(&ray_v, origin, vec, 'x');
 	while (ray_v.curr_pos.x >= 0 && ray_v.curr_pos.x < game->map.map_width)
 	{
 		ray_v.curr_pos.y = (vec.y / vec.x) * (ray_v.curr_pos.x - origin.x) + origin.y;
 		if (ray_v.curr_pos.y < 0 || ray_v.curr_pos.y >= game->map.map_height)
 			break ;
-		ray_v.collision.pos = (t_vec){.x = ray_v.curr_pos.x, .y = ray_v.curr_pos.y};
-		*vertical_distance = vec_magnitude(origin, ray_v.collision.pos);
-		if (*vertical_distance >= game->max_view_distance)
-			break ;
-		if (ray_v.curr_pos.y >= 0 && ray_v.curr_pos.y < game->map.map_height)
+		map_x = (int)ray_v.curr_pos.x;
+		map_y = (int)ray_v.curr_pos.y;
+		if (map_x >= 0 && map_x < game->map.map_width && map_y >= 0 && map_y < game->map.map_height)
 		{
-			if (game->map.map[(int)ray_v.curr_pos.y][(int)ray_v.curr_pos.x] == '1')
-				return (ray_v.collision.pos);
+			if (ft_strlen(game->map.map[map_y]) <= 1)
+				break ;
+			if (game->map.map[map_y][map_x] == '1')
+			{
+			ray_v.collision.pos = (t_vec){.x = ray_v.curr_pos.x, .y = ray_v.curr_pos.y};
+			*vertical_distance = vec_magnitude(origin, ray_v.collision.pos);
+			if (*vertical_distance >= game->max_view_distance)
+				break ;
+			return (ray_v.collision.pos);
+			}
 		}
 		ray_v.curr_pos.x += ray_v.grid_step;
 	}
@@ -209,20 +217,33 @@ t_vec	cal_vertical_hit(t_game *game, t_vec origin, t_vec vec, float *vertical_di
 t_vec	cal_horizontal_hit(t_game *game, t_vec origin, t_vec vec, float *horizontal_distance)
 {
 	t_raycast ray_h;
-	init_ray(&ray_h, origin, vec, 'y');
+	int map_x;
+	int map_y;
 	if (vec.y == 0) // 0'a bölme hatası
 		return ((t_vec){.x = -1, .y = -1}); //0,0
+	init_ray(&ray_h, origin, vec, 'y');
 	while (ray_h.curr_pos.y >= 0 && ray_h.curr_pos.y < game->map.map_height)
 	{
 		ray_h.curr_pos.x = (vec.x / vec.y) * (ray_h.curr_pos.y - origin.y) + origin.x;
-		ray_h.collision.pos = (t_vec){.x = ray_h.curr_pos.x, .y = ray_h.curr_pos.y};
-		*horizontal_distance = vec_magnitude(origin, ray_h.collision.pos);
+		if (ray_h.curr_pos.x < 0 || ray_h.curr_pos.x >= game->map.map_width)
+			break ;
+		map_x = (int)ray_h.curr_pos.x;
+		map_y = (int)ray_h.curr_pos.y;
 		if (*horizontal_distance >= game->max_view_distance)
 			break ;
-		if (ray_h.curr_pos.x >= 0 && ray_h.curr_pos.x < game->map.map_width)
+		if (map_x >= 0 && map_x < game->map.map_width && map_y >= 0 && map_y < game->map.map_height)
 		{
-			if (game->map.map[(int)ray_h.curr_pos.y][(int)ray_h.curr_pos.x] == '1')
-				return (ray_h.collision.pos);
+			if (ft_strlen(game->map.map[map_y]) <= 1 || map_x >= (int)ft_strlen(game->map.map[map_y]))
+				break ;
+			// printf("map_x: %d, map_y: %d\n", map_x, map_y);
+			if (game->map.map[map_y][map_x] == '1')
+			{
+			ray_h.collision.pos = (t_vec){.x = ray_h.curr_pos.x, .y = ray_h.curr_pos.y};
+			*horizontal_distance = vec_magnitude(origin, ray_h.collision.pos);
+			if (*horizontal_distance >= game->max_view_distance)
+				break ;
+			return (ray_h.collision.pos);
+			}
 		}
 		ray_h.curr_pos.y += ray_h.grid_step;
 	}
@@ -261,29 +282,21 @@ void raycasting(t_game *game, t_vec origin, t_vec vec, t_collision *collision)
 void	handle_ray(t_game *game)
 {
 	int i;
-	float angle_offset;
-	t_vec rotated;
+	float angle;
 
+	angle = -(WIDTH / 2);
 	game->ray_count = WIDTH;
-	angle_offset = -(WIDTH / 2);
 	i = 0;
-	while (i < game->ray_count)
+	while (i < WIDTH)
 	{
-		game->ray_angles[i] = rad_to_deg(atan(angle_offset / WIDTH));
-		rotated = rotate_vec(game->player.dir, game->ray_angles[i]);
-		raycasting(game, game->player.pos, rotated, &game->collisions[i]);
-		angle_offset += 1;
+		game->ray_angles[i] = rad_to_deg(atan(angle / WIDTH));
+		raycasting(game, game->player.pos, rotate_vec(game->player.dir, game->ray_angles[i]), &game->collisions[i]);
+		angle += 1;
 		i++;
 	}
 }
 
-void	ft_put_pixel(t_game *game, int x, int y, t_color_p color)
-{
-	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 0] = color.blue;   // Blue
-	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 1] = color.green;  // Green
-	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 2] = color.red;    // Red
-	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 3] = color.alpha;  // Alpha
-}
+
 
 void	draw_background(t_game *game)
 {
@@ -309,102 +322,112 @@ void	draw_background(t_game *game)
 		while (j < WIDTH)
 		{
 			if (i < HEIGHT / 2)
-				ft_put_pixel(game, j, i, c_color);
+				put_pixel(game, j, i, c_color);
 			else
-				ft_put_pixel(game, j, i, f_color);
+				put_pixel(game, j, i, f_color);
 			j++;
 		}
 		i++;
 	}
 }
-static t_color_p get_texture_color(t_img *texture, float tex_x, float tex_y)
+t_color_p	*fetch_texture_data(t_img *texture, float tex_x)
 {
-	int tex_pos_x;
-	int tex_pos_y;
-
-	tex_pos_x = (int)(tex_x * texture->row_size);
-	tex_pos_y = (int)(tex_y) * texture->row_size;
-	return texture->pixels[tex_pos_y + tex_pos_x];
+	float interpolated_val = tex_x * texture->row_size;
+	return (texture->img + ((int)interpolated_val * texture->row_size));
 }
 
-static void draw_wall_column(t_game *game, t_draw_params *params, int start_y, int end_y)
+float cal_tex_y(t_img *texture, float wall_height, float pos)
 {
-	int y;
+	float normalized_pos;
 	float tex_y;
-	t_color_p color;
 
-	y = start_y;
-	while (y < end_y)
+	if (pos < 0 || wall_height < 0)
 	{
-		// Y eksenindeki doku koordinatını hesapla
-		tex_y = ((y - start_y) / params->wall_height) * params->texture->line_count;
-
-		// Doku piksel rengini al
-		color = get_texture_color(params->texture, params->tex_x, tex_y);
-
-		// Pikselleri ekrana çiz
-		game->mlx_pixels[(y * game->mlx_row_size + params->column_index) * 4 + 0] = color.blue;
-		game->mlx_pixels[(y * game->mlx_row_size + params->column_index) * 4 + 1] = color.green;
-		game->mlx_pixels[(y * game->mlx_row_size + params->column_index) * 4 + 2] = color.red;
-		game->mlx_pixels[(y * game->mlx_row_size + params->column_index) * 4 + 3] = color.alpha;
-		y++;
+		printf("Error\nInvalid values for position or height\n");
+		return (0.0f);
 	}
+	normalized_pos = pos / wall_height;
+	tex_y = normalized_pos * texture->row_size;
+	return (tex_y);
 }
 
-void	draw_side(t_game *game, int i, float wall_height, float tex_x, t_side side)
+void put_pixel(t_game *game, int x, int y, t_color_p color)
 {
-	t_img *texture;
-	int start_y;
-	int end_y;
-	t_draw_params params;
+	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 0] = color.blue;
+	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 1] = color.green;
+	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 2] = color.red;
+	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 3] = color.alpha;
+}
+void render_texture(int *i, float *tex_y, float *wall_height, float *params_wall_height)
+{
+	*i = 0;
+	*tex_y = 0;
+	if (*params_wall_height < 0)
+	{
+		printf("Error\nLine_height is negative: %f\n", *params_wall_height);
+		*params_wall_height = 0;
+	}
+	*wall_height = *params_wall_height;
+	if (*params_wall_height > HEIGHT)
+		*params_wall_height = HEIGHT;
+}
 
-	if (side == North)
-		texture = &game->texture.NO;
-	else if (side == South)
-		texture = &game->texture.SO;
-	else if (side == West)
-		texture = &game->texture.WE;
-	else
-		texture = &game->texture.EA;
+void	draw_side(struct s_draw_params params)
+{
+	int i;
+	float wall_height;
+	float tex_y;
+	t_color_p *color;
 
-	start_y = (HEIGHT - wall_height) / 2;
-	if (start_y < 0)
-		start_y = 0;
-	end_y = (HEIGHT + wall_height) / 2;
-	if (end_y >= HEIGHT)
-		end_y = HEIGHT;
-	params.texture = texture;
-	params.wall_height = wall_height;
-	params.tex_x = tex_x;
-	params.column_index = i;
-	draw_wall_column(game, &params, start_y, end_y);
+	wall_height = HEIGHT;
+	color = fetch_texture_data(params.texture, params.tex_x);
+	if (!color)
+	{
+        printf("Error: Failed to fetch texture data\n");
+		return ;
+	}
+	i = 0;
+	render_texture(&i, &tex_y, &wall_height, &params.wall_height);
+	while (i < params.wall_height)
+	{
+		if (wall_height > HEIGHT)
+			tex_y = cal_tex_y(params.texture, wall_height, i + ((wall_height - HEIGHT) / 2));
+		else
+			tex_y = cal_tex_y(params.texture, params.wall_height, i);
+		if (tex_y < 0)
+			tex_y = 0;
+
+		if (tex_y >= params.texture->row_size)
+			tex_y = params.texture->row_size - 1;
+		 if (tex_y >= 0 && tex_y < params.texture->row_size)
+        {
+			printf("color: %d\n", color[(int)tex_y].value);
+            put_pixel(params.game, params.column_index, i + (HEIGHT - params.wall_height) / 2, color[(int)tex_y]);
+        }
+		i++;
+	}
 }
 
 void	draw_single_wall(t_game *game, float wall_height, int i, t_side side)
 {
 	t_vec collision_pos;
-	float tex_x;
 
 	collision_pos = game->collisions[i].pos;
 	if (side == North)
 	{
-		tex_x = collision_pos.x - (int)collision_pos.x;
-		draw_side(game, i, wall_height, tex_x, North);
+		draw_side((struct s_draw_params){.game = game, .texture = &game->texture.NO, .wall_height = wall_height, .tex_x = collision_pos.x - (int)collision_pos.x, .column_index = i});
 	}
 	else if (side == South)
 	{
-		tex_x = collision_pos.x - (int)collision_pos.x;
-		draw_side(game, i, wall_height, tex_x, South);
+		draw_side((struct s_draw_params){.game = game, .texture = &game->texture.SO, .wall_height = wall_height, .tex_x = collision_pos.x - (int)collision_pos.x, .column_index = i});
 	}
 	else if (side == West)
 	{
-		tex_x = collision_pos.y - (int)collision_pos.y;
-		draw_side(game, i, wall_height, tex_x, West);
+		draw_side((struct s_draw_params){.game = game, .texture = &game->texture.WE, .wall_height = wall_height, .tex_x = collision_pos.y - (int)collision_pos.y, .column_index = i});
 	}
-	else
+	else if (side == East)
 	{
-		tex_x = collision_pos.y - (int)collision_pos.y;
-		draw_side(game, i, wall_height, tex_x, East);
+		draw_side((struct s_draw_params){.game = game, .texture = &game->texture.EA, .wall_height = wall_height, .tex_x = collision_pos.y - (int)collision_pos.y, .column_index = i});
 	}
 }
 
@@ -441,6 +464,7 @@ void	draw_walls(t_game *game)
 			continue ;
 		}
 		wall_height =  HEIGHT / (distance * cos(deg_to_rad(game->ray_angles[i]))); //duvarın yüksekliği = ekran yüksekliği / (düzeltilmiş mesafe)
+
 		draw_single_wall(game, wall_height, i, game->collisions[i].side);
 		i++;
 	}
@@ -461,7 +485,6 @@ int	start_game(void *params)
 
 	draw_background(game);
 	draw_walls(game);
-	perror("handle_player");
 	mlx_put_image_to_window(game->mlx, game->win_ptr, game->mlx_img, 0, 0);
 	fps = ft_itoa((int)(1 / game->time));
 	mlx_string_put(game->mlx, game->win_ptr, HEIGHT, WIDTH, 0x00FF0000, fps); // 0x00FF0000??

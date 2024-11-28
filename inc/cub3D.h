@@ -125,13 +125,6 @@ typedef struct s_img
 	t_color_p	*pixels;
 }	t_img;
 
-typedef struct s_draw_params
-{
-	t_img	*texture;// Doku
-	float	wall_height; // Duvar yüksekliği
-	float	tex_x; // X eksenindeki doku koordinatı
-	int 	 column_index;// Ekrandaki sütun (ray) indeksi
-} t_draw_params;
 
 typedef struct s_color
 {
@@ -206,6 +199,15 @@ typedef struct s_game
 	t_moves *moves;
 
 } t_game;
+
+typedef struct s_draw_params
+{
+	t_game	*game;
+	t_img	*texture;// Doku
+	float	wall_height; // Duvar yüksekliği
+	float	tex_x; // X eksenindeki doku koordinatı
+	int 	 column_index;// Ekrandaki sütun (ray) indeksi
+} t_draw_params;
 
 // err.c
 t_err	perr(const char *func, const char *msg);
@@ -285,7 +287,20 @@ void	handle_player(t_game *game);
 float rad_to_deg(float angle);
 void raycasting(t_game *game, t_vec pos, t_vec vec, t_collision *collision);
 void	handle_ray(t_game *game);
-
+void	draw_walls(t_game *game);
+float	deg_to_rad(float degree);
+bool	is_zero_vec(t_vec vec);
+void	draw_single_wall(t_game *game, float wall_height, int i, t_side side);
+void	draw_side(struct s_draw_params params);
+void put_pixel(t_game *game, int x, int y, t_color_p color);
+float cal_tex_y(t_img *texture, float wall_height, float pos);
+t_color_p	*fetch_texture_data(t_img *texture, float tex_x);
+void	draw_background(t_game *game);
+t_vec	cal_horizontal_hit(t_game *game, t_vec origin, t_vec vec, float *horizontal_distance);
+t_vec	cal_vertical_hit(t_game *game, t_vec origin, t_vec vec, float *vertical_distance);
+float	vec_magnitude(t_vec vec1, t_vec vec2);
+void	init_ray(t_raycast *ray, t_vec origin, t_vec vec, char axis);
+void render_texture(int *i, float *tex_y, float *wall_height, float *params_wall_height);
 
 
 #endif
