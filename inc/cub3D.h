@@ -9,21 +9,34 @@
 # include <unistd.h>
 #include <stdbool.h>
 
-
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
 typedef enum e_err
 {
 	OK = 0,
 	ERR = 1
 } t_err;
-
+typedef union s_color_p
+{
+	struct 
+	{
+		unsigned char blue;
+		unsigned char green;
+		unsigned char red;
+		unsigned char alpha;
+	};
+	// unsigned int color;
+} t_color_p;
 typedef struct s_img
 {
 	void	*img;
 	char	*addr;
 	int		bpp;
-	int		line_length;
+	int		row_size;
+	int 	line_height;
 	int		endian;
 	char 	*path;
+	t_color_p *pixels;
 	int 	count;
 } t_img;
 
@@ -38,6 +51,8 @@ typedef struct s_color
 
 } t_color;
 
+
+
 typedef struct s_texture
 {
 	t_img NO;
@@ -50,12 +65,22 @@ typedef struct s_texture
 } t_texture;
 
 
+typedef struct s_vec
+{
+	double x;
+	double y;
+}	t_vec;
 typedef struct s_player
 {
 	int x;
 	int y;
 	char direction;
+	t_vec plane;
+	t_vec dir;
+	t_vec pos;
+
 } t_player;
+
 typedef struct s_map
 {
 	char	**map;
@@ -78,13 +103,24 @@ typedef struct s_image
 	void	*south;
 	void	*west;
 }	t_image;
+
+
+typedef struct s_mlx
+{
+	void	*mlx;
+	void	*win_ptr;
+	int 	win_width;
+	int 	win_height;
+	t_img 	img;
+} t_mlx;
 typedef struct s_game
 {
 	t_map	map;
-	void	*win_ptr;
-	void	*mlx;
 	t_image	image;
-
+	t_texture texture;
+	t_mlx 	mlx;
+	t_color_p floor;
+	t_color_p ceiling;
 } t_game;
 
 // err.c
@@ -141,5 +177,7 @@ int esc_press(int keycode, t_game *game);
 
 //
 t_err image_up(t_game *game);
+int	start_game(void *param);
+
 
 #endif
