@@ -14,7 +14,9 @@ int key_press_handler(int key_code, t_game *game)
 		game->moves->left = -1;
 	else if (key_code == RIGHT_KEY)
 		game->moves->right = -1;
+
 	return (0);
+
 }
 
 int	key_release_handler(int keycode, t_game *game)
@@ -36,6 +38,8 @@ int	key_release_handler(int keycode, t_game *game)
 }
 int close_window(t_game *game)
 {
+	if (game->mlx_img)
+		mlx_destroy_image(game->mlx, game->mlx_img);
     if (game->win_ptr)
         mlx_destroy_window(game->mlx, game->win_ptr);
     free(game);

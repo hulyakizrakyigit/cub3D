@@ -12,16 +12,16 @@ t_err image_up(t_game *game)
 
     game->texture.EA.pixels = (t_color_p *)mlx_get_data_addr(game->texture.EA.img, &game->texture.EA.bpp,
             &game->texture.EA.row_size, &game->texture.EA.byte_order);
-    game->texture.EA.bpp /= game->texture.EA.row_size / 8;
+//     game->texture.EA.bpp /= game->texture.EA.row_size / 8;
     game->texture.NO.pixels = (t_color_p *)mlx_get_data_addr(game->texture.NO.img, &game->texture.NO.bpp,
             &game->texture.NO.row_size, &game->texture.NO.byte_order);
-    game->texture.NO.bpp /= game->texture.NO.row_size / 8;
+//     game->texture.NO.bpp /= game->texture.NO.row_size / 8;
     game->texture.SO.pixels = (t_color_p *)mlx_get_data_addr(game->texture.SO.img, &game->texture.SO.bpp,
             &game->texture.SO.row_size, &game->texture.SO.byte_order);
-    game->texture.SO.bpp /= game->texture.SO.row_size / 8;
+//     game->texture.SO.bpp /= game->texture.SO.row_size / 8;
     game->texture.WE.pixels = (t_color_p *)mlx_get_data_addr(game->texture.WE.img, &game->texture.WE.bpp,
             &game->texture.WE.row_size, &game->texture.WE.byte_order);
-    game->texture.WE.bpp /= game->texture.WE.row_size / 8;
+//     game->texture.WE.bpp /= game->texture.WE.row_size / 8;
     if (!game->texture.EA.pixels || !game->texture.NO.pixels || !game->texture.SO.pixels || !game->texture.WE.pixels)
         return (perr(__func__, "mlx get data addr failed"));
 //transform texture and flip texture

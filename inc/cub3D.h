@@ -97,7 +97,12 @@ typedef struct s_moves
 typedef enum e_mlx_event
 {
 	KeyPress = 2,
-	KeyRelease = 3
+	KeyRelease = 3,
+	ButtonPress = 4,
+	ButtonRelease = 5,
+	MotionNotify = 6,
+	Expose = 12,
+	Destroy = 17
 }	t_mlx_event;
 
 typedef struct s_raycast
@@ -292,7 +297,7 @@ float	deg_to_rad(float degree);
 bool	is_zero_vec(t_vec vec);
 void	draw_single_wall(t_game *game, float wall_height, int i, t_side side);
 void	draw_side(struct s_draw_params params);
-void put_pixel(t_game *game, int x, int y, t_color_p color);
+void ft_put_pixel(t_game *game, int x, int y, t_color_p color);
 float cal_tex_y(t_img *texture, float wall_height, float pos);
 t_color_p	*fetch_texture_data(t_img *texture, float tex_x);
 void	draw_background(t_game *game);
@@ -301,6 +306,8 @@ t_vec	cal_vertical_hit(t_game *game, t_vec origin, t_vec vec, float *vertical_di
 float	vec_magnitude(t_vec vec1, t_vec vec2);
 void	init_ray(t_raycast *ray, t_vec origin, t_vec vec, char axis);
 void render_texture(int *i, float *tex_y, float *wall_height, float *params_wall_height);
+void	setup_texture_rendering(int *i, float *texture_y,
+	float *full_height, float *line_height);
 
 
 #endif

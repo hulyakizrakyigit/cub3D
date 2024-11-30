@@ -74,7 +74,7 @@ void	handle_player(t_game *game)
 	t_bool rotate;
 	float player_angle;
 
-	move_vec = (t_vec){.x = (game->moves)->a + (game->moves)->d, .y = (game->moves)->w + (game->moves)->s}; // hareket vektörünü oluştur
+	move_vec = (t_vec){.x = game->moves->a + game->moves->d, .y = game->moves->w + game->moves->s}; // hareket vektörünü oluştur
 	move_vec = normalize_vec(move_vec); // vektörü normalize et
 	player_angle = (-atan2(game->player.dir.x, game->player.dir.y));
 	move_vec = rotate_vec(move_vec, player_angle);
@@ -316,97 +316,179 @@ void	draw_background(t_game *game)
 	f_color.blue = (unsigned char)(game->texture.F.B);
 
 	i = 0;
-	while (i < HEIGHT)
+ 	while (i < HEIGHT / 2)
+    {
+        j = 0;
+        while (j < WIDTH)
+        {
+            ft_put_pixel(game, j, i, c_color);
+            j++;
+        }
+        i++;
+    }
+
+    // Alt yarı (zemin) için
+    while (i < HEIGHT)
+    {
+        j = 0;
+        while (j < WIDTH)
+        {
+            ft_put_pixel(game, j, i, f_color);
+            j++;
+        }
+        i++;
+    }
+}
+float	ft_normalize(float value, float min, float max)
+{
+	if (max == min)
+		return (1);
+	return ((value - min) / (max - min));
+}
+
+float	linear_interpolation(float value, float min, float max)
+{
+	return ((value * (max - min)) + min);
+}
+t_color_p	*fetch_texture_data(t_img *texture, float tex_x)
+{
+	// float interpolated_val = tex_x * texture->row_size;
+	// return (texture->img + ((int)interpolated_val * texture->row_size));
+if (!texture || !texture->img || texture->row_size <= 0)
+{
+    printf("Geçersiz texture veya row_size!\n");
+    return NULL;
+}
+	texture->img = malloc(texture->row_size * texture->line_count * sizeof(t_color_p));
+		return (texture->img + \
+	((int)linear_interpolation(tex_x, 0, texture->row_size) \
+	* texture->row_size));
+}
+float cal_tex_y(t_img *texture, float wall_height, float pos)
+{
+	if (pos < 0 || wall_height <= 0)
 	{
-		j = 0;
-		while (j < WIDTH)
+		printf("Error\nInvalid values for pos or wall_height\n");
+		return (0.0f);
+	}
+	return (linear_interpolation(ft_normalize(pos, 0, wall_height), 0,
+			texture->row_size - 1));
+}
+
+void ft_put_pixel(t_game *game, int x, int y, t_color_p color)
+{
+    if (x < 0 || x >= game->win_width || y < 0 || y >= game->win_height)
+        return;
+
+    // Piksel bellek adresine doğru erişim
+    game->mlx_pixels[(x * 4) + (y * game->mlx_row_size) + 0] = color.blue;
+    game->mlx_pixels[(x * 4) + (y * game->mlx_row_size) + 1] = color.green;
+    game->mlx_pixels[(x * 4) + (y * game->mlx_row_size) + 2] = color.red;
+    game->mlx_pixels[(x * 4) + (y * game->mlx_row_size) + 3] = color.alpha;
+
+}
+
+// void render_texture(int *i, float *tex_y, float *wall_height, float *params_wall_height)
+// {
+// 	*i = 0;
+// 	*tex_y = 0;
+// 	if (*params_wall_height < 0)
+// 	{
+// 		printf("Error\nLine_height is negative: %f\n", *params_wall_height);
+// 		*params_wall_height = 0;
+// 	}
+// 	*wall_height = *params_wall_height;
+// 	if (*params_wall_height > HEIGHT)
+// 		*params_wall_height = HEIGHT;
+// }
+void	setup_texture_rendering(int *i, float *texture_y,
+	float *full_height, float *line_height)
+{
+	*i = 0;
+	*texture_y = 0;
+	if (*line_height < 0)
+	{
+		printf("Error\nLine_height is negative: %f\n", *line_height);
+		*line_height = 0;
+	}
+	*full_height = *line_height;
+	if (*line_height > HEIGHT)
+		*line_height = HEIGHT;
+}
+
+// void	draw_side(struct s_draw_params params)
+// {
+// 	int i;
+// 	float wall_height;
+// 	float tex_y;
+// 	t_color_p *color;
+
+// 	wall_height = HEIGHT;
+// 	color = fetch_texture_data(params.texture, params.tex_x);
+// 	if (!color)
+// 	{
+//         printf("Error: Failed to fetch texture data\n");
+// 		return ;
+// 	}
+// 	i = 0;
+// 	render_texture(&i, &tex_y, &wall_height, &params.wall_height);
+// 	while (i < params.wall_height)
+// 	{
+// 		if (wall_height > HEIGHT)
+// 			tex_y = cal_tex_y(params.texture, wall_height, i + ((wall_height - HEIGHT) / 2));
+// 		else
+// 			tex_y = cal_tex_y(params.texture, params.wall_height, i);
+// 		if (tex_y < 0)
+// 			tex_y = 0;
+
+// 		if (tex_y >= params.texture->row_size)
+// 			tex_y = params.texture->row_size - 1;
+// 		 if (tex_y >= 0 && tex_y < params.texture->row_size)
+//         {
+// 			printf("color: %d\n", color[(int)tex_y].value);
+//             put_pixel(params.game, params.column_index, i + (HEIGHT - params.wall_height) / 2, color[(int)tex_y]);
+//         }
+// 		i++;
+// 	}
+// }
+void	draw_side(struct s_draw_params drw)
+{
+	int		i;
+	float	tex_y;
+	float	height;
+	t_color_p	*data;
+
+	height = HEIGHT;
+	data = fetch_texture_data(drw.texture, drw.tex_x);
+
+	 if (!data || !drw.game || !drw.texture)
+    {
+        printf("Error: Invalid data or parameters\n");
+        return;
+    }
+
+	i = 0;
+	setup_texture_rendering(&i, &tex_y, &height, &drw.wall_height);
+	while (i < drw.wall_height)
+	{
+		if (height > HEIGHT)
+			tex_y = cal_tex_y(drw.texture, height, i + \
+			((height - HEIGHT) / 2));
+		else
+			tex_y = cal_tex_y(drw.texture, drw.wall_height, i);
+		if (tex_y >= drw.texture->row_size)
+			tex_y = drw.texture->row_size - 1;
+		if (tex_y >= 0 && tex_y < drw.texture->row_size)
 		{
-			if (i < HEIGHT / 2)
-				put_pixel(game, j, i, c_color);
-			else
-				put_pixel(game, j, i, f_color);
-			j++;
+			t_color_p color = data[(int)tex_y];
+			ft_put_pixel(drw.game, drw.column_index, i + (HEIGHT - drw.wall_height) / 2, color);
 		}
 		i++;
 	}
 }
-t_color_p	*fetch_texture_data(t_img *texture, float tex_x)
-{
-	float interpolated_val = tex_x * texture->row_size;
-	return (texture->img + ((int)interpolated_val * texture->row_size));
-}
 
-float cal_tex_y(t_img *texture, float wall_height, float pos)
-{
-	float normalized_pos;
-	float tex_y;
 
-	if (pos < 0 || wall_height < 0)
-	{
-		printf("Error\nInvalid values for position or height\n");
-		return (0.0f);
-	}
-	normalized_pos = pos / wall_height;
-	tex_y = normalized_pos * texture->row_size;
-	return (tex_y);
-}
 
-void put_pixel(t_game *game, int x, int y, t_color_p color)
-{
-	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 0] = color.blue;
-	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 1] = color.green;
-	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 2] = color.red;
-	game->mlx_pixels[(x + y * game->mlx_row_size) * 4 + 3] = color.alpha;
-}
-void render_texture(int *i, float *tex_y, float *wall_height, float *params_wall_height)
-{
-	*i = 0;
-	*tex_y = 0;
-	if (*params_wall_height < 0)
-	{
-		printf("Error\nLine_height is negative: %f\n", *params_wall_height);
-		*params_wall_height = 0;
-	}
-	*wall_height = *params_wall_height;
-	if (*params_wall_height > HEIGHT)
-		*params_wall_height = HEIGHT;
-}
-
-void	draw_side(struct s_draw_params params)
-{
-	int i;
-	float wall_height;
-	float tex_y;
-	t_color_p *color;
-
-	wall_height = HEIGHT;
-	color = fetch_texture_data(params.texture, params.tex_x);
-	if (!color)
-	{
-        printf("Error: Failed to fetch texture data\n");
-		return ;
-	}
-	i = 0;
-	render_texture(&i, &tex_y, &wall_height, &params.wall_height);
-	while (i < params.wall_height)
-	{
-		if (wall_height > HEIGHT)
-			tex_y = cal_tex_y(params.texture, wall_height, i + ((wall_height - HEIGHT) / 2));
-		else
-			tex_y = cal_tex_y(params.texture, params.wall_height, i);
-		if (tex_y < 0)
-			tex_y = 0;
-
-		if (tex_y >= params.texture->row_size)
-			tex_y = params.texture->row_size - 1;
-		 if (tex_y >= 0 && tex_y < params.texture->row_size)
-        {
-			printf("color: %d\n", color[(int)tex_y].value);
-            put_pixel(params.game, params.column_index, i + (HEIGHT - params.wall_height) / 2, color[(int)tex_y]);
-        }
-		i++;
-	}
-}
 
 void	draw_single_wall(t_game *game, float wall_height, int i, t_side side)
 {
@@ -470,6 +552,7 @@ void	draw_walls(t_game *game)
 	}
 }
 
+
 int	start_game(void *params)
 {
 	char *fps;
@@ -482,12 +565,11 @@ int	start_game(void *params)
 	old_time = curr_time;
 	handle_player(game);
 	handle_ray(game);
-
 	draw_background(game);
-	draw_walls(game);
+	//draw_walls(game);
 	mlx_put_image_to_window(game->mlx, game->win_ptr, game->mlx_img, 0, 0);
 	fps = ft_itoa((int)(1 / game->time));
-	mlx_string_put(game->mlx, game->win_ptr, HEIGHT, WIDTH, 0x00FF0000, fps); // 0x00FF0000??
+	// mlx_string_put(game->mlx, game->win_ptr, HEIGHT, WIDTH, 0x00FF0000, fps); // 0x00FF0000??
 	free(fps);
 	return (0);
 }
