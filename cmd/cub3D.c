@@ -60,14 +60,18 @@ int main(int ac, char **av)
 		perr(__func__, "validate_map failed");
 		return (dispose(game), 1);
 	}
-	
+
 	if (init_mlx(game) != OK)
 	{
 		perr(__func__, "mlx init failed");
 		return (dispose(game), 1);
 	}
+		int i = 0;
+	while (game->map.map[i])
+		i++;
+	game->map.map_height = i;
 	mlx_hook(game->mlx.win_ptr, 17, 0, close_window, game); //çarpı işaretinden kapanacak
-    mlx_key_hook(game->mlx.win_ptr, key_press, game); //esc ile kapancak 
+    mlx_key_hook(game->mlx.win_ptr, key_press, game); //esc ile kapancak
 	if (image_up(game) != OK)
 	{
 		perr(__func__, "image up failed");

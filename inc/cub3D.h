@@ -20,7 +20,7 @@ typedef enum e_err
 } t_err;
 typedef union s_color_p
 {
-	struct 
+	struct
 	{
 		unsigned char blue;
 		unsigned char green;
@@ -91,6 +91,7 @@ typedef struct s_map
 	int		row;
 	int 	map_len;
 	int 	map_width;
+	int 	map_height;
 	int 	map_start;
 	int 	map_end;
 	int 	player_count;
@@ -130,7 +131,7 @@ typedef struct s_game
 	double 	rayDirX; //ray in x yönündeki vektörü
 	double 	rayDirY; //ray in y yönündeki vektörü
 	int	  	rayMapX; //ray in bulunduğu map karesinin (box or frame) x koordinatı
-	int  	rayMapY; //ray in bulunduğu map karesinin y koordinatı 
+	int  	rayMapY; //ray in bulunduğu map karesinin y koordinatı
 	double 	sideDistX; //ray in x yönündeki uzaklığı
 	double 	sideDistY; //ray in y yönündeki uzaklığı
 	double 	deltaDistX; //ray in x yönündeki adımı
@@ -209,6 +210,6 @@ void draw_background(t_game *game);
 void rotate_player(t_game *game, double rotation);
 void move_player(t_game *game, int direction);
 int key_press(int keycode, t_game *game);
-t_color_p get_wall_color(void);
+t_color_p get_wall_color(t_game *game);
 
 #endif

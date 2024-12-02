@@ -5,6 +5,32 @@
 #define MOVE_SPEED 0.20
 #define ROT_SPEED 0.10
 
+t_color_p get_wall_color(t_game *game)
+{
+    t_color_p color;
+
+    // Eğer ray Y yönünde (kuzey veya güney) bir duvara çarpmışsa
+    if (game->side == 1)
+    {
+       // printf("XXXXXXXXgame->side == 1\n");
+        if (game->rayDirY > 0)
+            color = game->texture.NO.pixels[game->rayMapX + game->rayMapY * game->texture.NO.count];
+        else
+            color = game->texture.SO.pixels[game->rayMapX + game->rayMapY * game->texture.SO.count];
+    }
+    // Eğer ray X yönünde (doğu veya batı) bir duvara çarpmışsa
+    else
+    {
+      //  printf("XXXXXXXXXgame->side == 0\n");
+        if (game->rayDirX > 0)
+            color = game->texture.EA.pixels[game->rayMapX + game->rayMapY * game->texture.EA.count];
+        else
+            color = game->texture.WE.pixels[game->rayMapX + game->rayMapY * game->texture.WE.count];
+    }
+
+    return color;
+}
+
 int key_press(int keycode, t_game *game) {
     double newX, newY, oldDirX, oldPlaneX;
 
@@ -14,28 +40,64 @@ int key_press(int keycode, t_game *game) {
         exit(0);
     }
 
+    // Harita sınırlarını belirleyelim
+    int mapWidth = game->map.map_width;
+    int mapHeight = game->map.map_height;
+
     // Move forward (keycode 13 -> W)
-    if (keycode == 13 || keycode == 2) {
+    if (keycode == 13) {
         newX = game->map.player.pos.x + game->map.player.dir.x * MOVE_SPEED;
         newY = game->map.player.pos.y + game->map.player.dir.y * MOVE_SPEED;
-        if (game->map.map[(int)newY][(int)newX] == '0') {
-            game->map.player.pos.x = newX;
-            game->map.player.pos.y = newY;
+        // Harita sınırları içinde mi?
+        if ((int)newX >= 0 && (int)newX < mapWidth && (int)newY >= 0 && (int)newY < mapHeight) {
+            if (game->map.map[(int)newY][(int)newX] == '0') {
+                game->map.player.pos.x = newX;
+                game->map.player.pos.y = newY;
+            }
         }
     }
 
     // Move backward (keycode 1 -> S)
-    if (keycode == 1 || keycode == 0) {
+    if (keycode == 1) {
         newX = game->map.player.pos.x - game->map.player.dir.x * MOVE_SPEED;
         newY = game->map.player.pos.y - game->map.player.dir.y * MOVE_SPEED;
-        if (game->map.map[(int)newY][(int)newX] == '0') {
-            game->map.player.pos.x = newX;
-            game->map.player.pos.y = newY;
+        // Harita sınırları içinde mi?
+        if ((int)newX >= 0 && (int)newX < mapWidth && (int)newY >= 0 && (int)newY < mapHeight) {
+            if (game->map.map[(int)newY][(int)newX] == '0') {
+                game->map.player.pos.x = newX;
+                game->map.player.pos.y = newY;
+            }
         }
     }
 
-    // Rotate left (keycode 0 -> A or Left Arrow -> 123)
-    if (keycode == 0 || keycode == 123) {
+    // Move left (keycode 0 -> A)
+    if (keycode == 0) {  // A tuşu - Sola hareket
+        newX = game->map.player.pos.x - game->map.player.plane.x * MOVE_SPEED;
+        newY = game->map.player.pos.y - game->map.player.plane.y * MOVE_SPEED;
+        // Harita sınırları içinde mi?
+        if ((int)newX >= 0 && (int)newX < mapWidth && (int)newY >= 0 && (int)newY < mapHeight) {
+            if (game->map.map[(int)newY][(int)newX] == '0') {
+                game->map.player.pos.x = newX;
+                game->map.player.pos.y = newY;
+            }
+        }
+    }
+
+    // Move right (keycode 2 -> D)
+    if (keycode == 2) {  // D tuşu - Sağa hareket
+        newX = game->map.player.pos.x + game->map.player.plane.x * MOVE_SPEED;
+        newY = game->map.player.pos.y + game->map.player.plane.y * MOVE_SPEED;
+        // Harita sınırları içinde mi?
+        if ((int)newX >= 0 && (int)newX < mapWidth && (int)newY >= 0 && (int)newY < mapHeight) {
+            if (game->map.map[(int)newY][(int)newX] == '0') {
+                game->map.player.pos.x = newX;
+                game->map.player.pos.y = newY;
+            }
+        }
+    }
+
+    // Rotate left (keycode 123 -> Left Arrow)
+    if (keycode == 123) {  // Sol ok tuşu
         oldDirX = game->map.player.dir.x;
         game->map.player.dir.x = game->map.player.dir.x * cos(ROT_SPEED) - game->map.player.dir.y * sin(ROT_SPEED);
         game->map.player.dir.y = oldDirX * sin(ROT_SPEED) + game->map.player.dir.y * cos(ROT_SPEED);
@@ -44,8 +106,8 @@ int key_press(int keycode, t_game *game) {
         game->map.player.plane.y = oldPlaneX * sin(ROT_SPEED) + game->map.player.plane.y * cos(ROT_SPEED);
     }
 
-    // Rotate right (keycode 2 -> D or Right Arrow -> 124)
-    if (keycode == 2 || keycode == 124) {
+    // Rotate right (keycode 124 -> Right Arrow)
+    if (keycode == 124) {  // Sağ ok tuşu
         oldDirX = game->map.player.dir.x;
         game->map.player.dir.x = game->map.player.dir.x * cos(-ROT_SPEED) - game->map.player.dir.y * sin(-ROT_SPEED);
         game->map.player.dir.y = oldDirX * sin(-ROT_SPEED) + game->map.player.dir.y * cos(-ROT_SPEED);
@@ -57,6 +119,8 @@ int key_press(int keycode, t_game *game) {
     raycast(game);
     return 0;
 }
+
+
 
 void verLine(t_game *game, int x, int drawStart, int drawEnd, t_color_p color)
 {
@@ -73,24 +137,7 @@ void verLine(t_game *game, int x, int drawStart, int drawEnd, t_color_p color)
         y++;
     }
 }
-t_color_p wallColors[] = 
-{
-    {0, 0, 150, 0},
-    {0, 0, 150, 0},
-    {0, 0, 150, 0},
-    {0, 0, 150, 0},
-    {0, 0, 150, 0}
-};
 
-// t_color_p get_wall_color(wallColors)
-t_color_p get_wall_color(void)
-{
-    return wallColors[0];
-    // if (wallType >= 1 && wallType <= 4)
-    //     return wallColors[wallType - 1];
-    // else
-    //     return wallColors[4]; 
-}
 
 void raycast(t_game *game)
 {
@@ -99,7 +146,7 @@ void raycast(t_game *game)
 
     for (int x = 0; x < SCREEN_WIDTH; x++)
     {
-        game->hit = 0; 
+        game->hit = 0;
         game->cameraX = 2 * x / (double)SCREEN_WIDTH - 1;
         game->rayDirX = game->map.player.dir.x + game->map.player.plane.x * game->cameraX;
         game->rayDirY = game->map.player.dir.y + game->map.player.plane.y * game->cameraX;
@@ -170,20 +217,8 @@ void raycast(t_game *game)
         if (game->drawEnd >= SCREEN_HEIGHT)
             game->drawEnd = SCREEN_HEIGHT - 1;
 
-        
-        int wallType;
-        wallType = 0;
-        if (game->rayMapX >= 0 && game->rayMapX < game->map.map_width &&
-            game->rayMapY >= 0 && game->rayMapY < game->map.row)
-                wallType = game->map.map[game->rayMapY][game->rayMapX] - '0';
-        game->wallColor = get_wall_color();
-        // game->wallColor = get_wall_color(wallType);
-        if (game->side == 1)
-        {
-            game->wallColor.red /= 2;
-            game->wallColor.green /= 2;
-            game->wallColor.blue /= 2;
-        }
+  t_color_p color;
+    color = get_wall_color(game);
         verLine(game, x, game->drawStart, game->drawEnd, game->wallColor);
     }
     // FPS Hesaplaması
@@ -231,20 +266,16 @@ int	start_game(void *param)
 {
     t_game *game;
     game = (t_game *)param;
-    
-    game->floor.red = 144;
-    game->floor.green = 238;
-    game->floor.blue = 144;
+
+    game->floor.red = game->map.texture.F.R;
+    game->floor.green = game->map.texture.F.G;
+    game->floor.blue = game->map.texture.F.B;
     game->floor.alpha = 0;
 
-    game->ceiling.red = 173;
-    game->ceiling.green = 216;
-    game->ceiling.blue = 230;
+    game->ceiling.red = game->map.texture.C.R;
+    game->ceiling.green = game->map.texture.C.G;
+    game->ceiling.blue = game->map.texture.C.B;
     game->ceiling.alpha = 0;
-    // printf("Floor Color: %d, %d, %d\n", game->floor.red, game->floor.green, game->floor.blue);
-    // printf("Ceiling Color: %d, %d, %d\n", game->ceiling.red, game->ceiling.green, game->ceiling.blue);
-    // printf("Floor: %d, %d, %d\n", game->map.texture.F.R, game->map.texture.F.G, game->map.texture.F.B);
-    // printf("Ceiling: %d, %d, %d\n", game->map.texture.C.R, game->map.texture.C.G, game->map.texture.C.B);
 
     game->map.player.pos.x = 9.0;
     game->map.player.pos.y = 11.0;
