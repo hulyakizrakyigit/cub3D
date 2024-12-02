@@ -27,7 +27,7 @@ typedef union s_color_p
 		unsigned char red;
 		unsigned char alpha;
 	};
-	// unsigned int color;
+	unsigned int color;
 } t_color_p;
 
 typedef struct s_img
@@ -54,16 +54,21 @@ typedef struct s_color
 
 } t_color;
 
-typedef struct s_texture
+typedef union s_texture
 {
-	t_img NO;
-	t_img SO;
-	t_img WE;
-	t_img EA;
-	t_color F;
-	t_color C;
-
+    struct {
+        t_img NO;
+        t_img SO;
+        t_img WE;
+        t_img EA;
+    };
+    struct {
+        t_color F;
+        t_color C;
+    };
+	int value[4];
 } t_texture;
+
 
 typedef struct s_vec
 {

@@ -1,68 +1,39 @@
 
 #include "cub3D.h"
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #define MOVE_SPEED 0.20
 #define ROT_SPEED 0.10
+#define texWidth 64
+#define texHeight 64
+unsigned int buffer[SCREEN_HEIGHT][SCREEN_WIDTH];
 
-t_color_p get_wall_color(t_game *game)
+void drawBuffer(t_game *game, unsigned int **buffer, int w, int h)
 {
-    // t_color_p color;
 
-    // // Eğer ray Y yönünde (kuzey veya güney) bir duvara çarpmışsa
-    // if (game->side == 1)
-    // {
-    //    // printf("XXXXXXXXgame->side == 1\n");
-    //     if (game->rayDirY > 0)
-    //         color = game->texture.NO.pixels[game->rayMapX + game->rayMapY * (game->texture.NO.row_size / sizeof(t_color_p))];
-    //     else
-    //         color = game->texture.SO.pixels[game->rayMapX + game->rayMapY * (game->texture.NO.row_size / sizeof(t_color_p))];
-    // }
-    // // Eğer ray X yönünde (doğu veya batı) bir duvara çarpmışsa
-    // else
-    // {
-    //   //  printf("XXXXXXXXXgame->side == 0\n");
-    //     if (game->rayDirX > 0)
-    //         color = game->texture.EA.pixels[game->rayMapX + game->rayMapY * (game->texture.NO.row_size / sizeof(t_color_p))];
-    //     else
-    //         color = game->texture.WE.pixels[game->rayMapX + game->rayMapY * (game->texture.NO.row_size / sizeof(t_color_p))];
-    // }
-
-    // return color;
-        t_color_p color;
-    int texWidth, texHeight, texX, texY;
-
-    if (game->side == 1) // Y yönünde çarpma
-    {
-        texWidth = game->texture.NO.row_size; // Texture genişliği
-        texHeight = game->texture.NO.line_height; // Texture yüksekliği
-
-
-
-        texX = (int)(game->perpWallDist_x * texWidth) % texWidth;
-        texY = (int)(game->perpWallDist_y * texHeight) % texHeight;
-
-        if (game->rayDirY > 0)
-            color = game->texture.NO.pixels[texX + texY * (game->texture.NO.row_size / sizeof(t_color_p))];
-        else
-            color = game->texture.SO.pixels[texX + texY * (game->texture.SO.row_size / sizeof(t_color_p))];
-    }
-    else // X yönünde çarpma
-    {
-        texWidth = game->texture.EA.row_size;
-        texHeight = game->texture.EA.line_height;
-
-        texX = (int)(game->perpWallDist_x * texWidth) % texWidth;
-        texY = (int)(game->perpWallDist_y * texHeight) % texHeight;
-
-        if (game->rayDirX > 0)
-            color = game->texture.EA.pixels[texX + texY * (game->texture.EA.row_size / sizeof(t_color_p))];
-        else
-            color = game->texture.WE.pixels[texX + texY * (game->texture.WE.row_size / sizeof(t_color_p))];
+    // Buffer'daki pikselleri imgData'ya kopyalayın
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            t_color_p color;
+            color.color = buffer[y][x];
+            game->mlx.img.pixels[y * w + x] = color; // t_color_p'yi atama
+        }
     }
 
-    return color;
+    // Ekrana resim çizin
+    mlx_put_image_to_window(game->mlx.mlx, game->mlx.win_ptr, game->mlx.img.img, 0, 0);
+    mlx_destroy_image(game->mlx.mlx, game->mlx.img.img); // Resmi bellekten sil
+}
 
+// Buffer'ı sıfırlama (temizleme)
+void clearBuffer(unsigned int **buffer, int w, int h)
+{
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            buffer[y][x] = 0; // Pikselleri siyah yap
+        }
+    }
 }
 
 int key_press(int keycode, t_game *game) {
@@ -241,28 +212,68 @@ void raycast(t_game *game)
         if (game->side == 0)
         {
             game->perpWallDist = game->sideDistX - game->deltaDistX;
-            game->perpWallDist_x = game->rayDirX;
-            game->perpWallDist_y = (game->rayMapX - game->map.player.pos.x + (1 - game->stepX) / 2) / game->rayDirX;
 
         }
         else
         {
             game->perpWallDist = game->sideDistY - game->deltaDistY;
-            game->perpWallDist_x = (game->rayMapY - game->map.player.pos.y + (1 - game->stepY) / 2) / game->rayDirY;
-            game->perpWallDist_y = game->rayDirY;
+        
         }
 
         game->lineHeight = (int)(SCREEN_HEIGHT / game->perpWallDist);
-        game->drawStart = (-game->lineHeight / 2) + (SCREEN_HEIGHT / 2);
-        if (game->drawStart < 0)
-            game->drawStart = 0;
-        game->drawEnd = (game->lineHeight / 2) + (SCREEN_HEIGHT / 2);
-        if (game->drawEnd >= SCREEN_HEIGHT)
-            game->drawEnd = SCREEN_HEIGHT - 1;
 
-  t_color_p color;
-    color = get_wall_color(game);
-    verLine(game, x, game->drawStart, game->drawEnd, color);
+        int pitch = 100;
+        int drawStart = -game->lineHeight / 2 + SCREEN_HEIGHT / 2 + pitch; 
+        if (drawStart < 0)
+            drawStart = 0;
+        int drawEnd = game->lineHeight / 2 + SCREEN_HEIGHT / 2 + pitch;
+        if (drawEnd >= SCREEN_HEIGHT)
+            drawEnd = SCREEN_HEIGHT - 1;
+        int texNum = game->map.map[game->rayMapY][game->rayMapX] - 1;
+        double wallX;
+        if (game->side == 0)
+            wallX = game->map.player.pos.y + game->perpWallDist * game->rayDirY;
+        else
+            wallX = game->map.player.pos.x + game->perpWallDist * game->rayDirX;
+        wallX -= floor(wallX);
+        int texX = (int)(wallX * (double)(texWidth));
+        if (game->side == 0 && game->rayDirX > 0)
+            texX = texWidth - texX - 1;
+        if (game->side == 1 && game->rayDirY < 0)
+            texX = texWidth - texX - 1;
+if (game->side == 0) {
+    if (game->rayDirX > 0)
+        texNum = 3; // East (EA)
+    else
+        texNum = 2; // West (WE)
+} else {
+    if (game->rayDirY > 0)
+        texNum = 1; // South (SO)
+    else
+        texNum = 0; // North (NO)
+}
+
+        double step = 1.0 * texHeight / game->lineHeight;
+        double texPos = (drawStart - pitch - SCREEN_HEIGHT / 2 + game->lineHeight / 2) * step;
+        for (int y = drawStart; y < drawEnd; y++)
+        {
+            int texY = (int)(texPos) & (texHeight - 1);
+            texPos += step;
+            unsigned int color;
+            if (texNum == 0)
+                color = game->texture.NO.addr[texHeight * texY + texX];
+            if (texNum == 1)
+                color = game->texture.SO.addr[texHeight * texY + texX];
+            if (texNum == 2)
+                color = game->texture.WE.addr[texHeight * texY + texX];
+            if (texNum == 3)
+                color = game->texture.EA.addr[texHeight * texY + texX];
+            if (game->side == 1)
+                color = (color >> 1) & 8355711;
+            buffer[y][x] = color;
+        }
+
+   
     }
     // FPS Hesaplaması
     gettimeofday(&endTime, NULL); // Frame bitiminde zamanı alıyoruz

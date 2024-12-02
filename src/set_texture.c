@@ -4,6 +4,7 @@ t_err	control_texture_dir(t_texture *texture)
 {
 	if (texture->NO.count != 1)
 	{
+		printf("texture->NO.count: %d\n", texture->NO.count);
 	return (perr(__func__, "Invalid texture NO count."));
 	}
 	if (texture->SO.count != 1)
