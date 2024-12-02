@@ -18,9 +18,22 @@ t_err image_up(t_game *game)
     game->texture.SO.img = game->image.south;
     game->texture.WE.img = game->image.west;
 
+game->texture.EA.line_height = SCREEN_HEIGHT;
+    game->texture.NO.line_height = SCREEN_HEIGHT;
+    game->texture.SO.line_height = SCREEN_HEIGHT;
+    game->texture.WE.line_height = SCREEN_HEIGHT;
+game->texture.EA.row_size = SCREEN_WIDTH;
+    game->texture.NO.row_size = SCREEN_WIDTH;
+    game->texture.SO.row_size = SCREEN_WIDTH;
+    game->texture.WE.row_size = SCREEN_WIDTH;
+
     game->texture.EA.pixels = (t_color_p *)mlx_get_data_addr(game->texture.EA.img, &game->texture.EA.bpp, &game->texture.EA.row_size, &game->texture.EA.endian);
     game->texture.NO.pixels = (t_color_p *)mlx_get_data_addr(game->texture.NO.img, &game->texture.NO.bpp, &game->texture.NO.row_size, &game->texture.NO.endian);
     game->texture.SO.pixels = (t_color_p *)mlx_get_data_addr(game->texture.SO.img, &game->texture.SO.bpp, &game->texture.SO.row_size, &game->texture.SO.endian);
     game->texture.WE.pixels = (t_color_p *)mlx_get_data_addr(game->texture.WE.img, &game->texture.WE.bpp, &game->texture.WE.row_size, &game->texture.WE.endian);
+
+    if (!game->texture.EA.pixels || !game->texture.NO.pixels || !game->texture.SO.pixels || !game->texture.WE.pixels)
+        return (perr(__func__, "get data addr failed"));
+
     return (OK);
 }

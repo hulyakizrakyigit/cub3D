@@ -7,28 +7,62 @@
 
 t_color_p get_wall_color(t_game *game)
 {
-    t_color_p color;
+    // t_color_p color;
 
-    // Eğer ray Y yönünde (kuzey veya güney) bir duvara çarpmışsa
-    if (game->side == 1)
+    // // Eğer ray Y yönünde (kuzey veya güney) bir duvara çarpmışsa
+    // if (game->side == 1)
+    // {
+    //    // printf("XXXXXXXXgame->side == 1\n");
+    //     if (game->rayDirY > 0)
+    //         color = game->texture.NO.pixels[game->rayMapX + game->rayMapY * (game->texture.NO.row_size / sizeof(t_color_p))];
+    //     else
+    //         color = game->texture.SO.pixels[game->rayMapX + game->rayMapY * (game->texture.NO.row_size / sizeof(t_color_p))];
+    // }
+    // // Eğer ray X yönünde (doğu veya batı) bir duvara çarpmışsa
+    // else
+    // {
+    //   //  printf("XXXXXXXXXgame->side == 0\n");
+    //     if (game->rayDirX > 0)
+    //         color = game->texture.EA.pixels[game->rayMapX + game->rayMapY * (game->texture.NO.row_size / sizeof(t_color_p))];
+    //     else
+    //         color = game->texture.WE.pixels[game->rayMapX + game->rayMapY * (game->texture.NO.row_size / sizeof(t_color_p))];
+    // }
+
+    // return color;
+        t_color_p color;
+    int texWidth, texHeight, texX, texY;
+
+    if (game->side == 1) // Y yönünde çarpma
     {
-       // printf("XXXXXXXXgame->side == 1\n");
+        texWidth = game->texture.NO.row_size; // Texture genişliği
+        texHeight = game->texture.NO.line_height; // Texture yüksekliği
+
+
+
+        texX = (int)(game->perpWallDist_x * texWidth) % texWidth;
+        texY = (int)(game->perpWallDist_y * texHeight) % texHeight;
+
         if (game->rayDirY > 0)
-            color = game->texture.NO.pixels[game->rayMapX + game->rayMapY * game->texture.NO.count];
+            color = game->texture.NO.pixels[texX + texY * (game->texture.NO.row_size / sizeof(t_color_p))];
         else
-            color = game->texture.SO.pixels[game->rayMapX + game->rayMapY * game->texture.SO.count];
+            color = game->texture.SO.pixels[texX + texY * (game->texture.SO.row_size / sizeof(t_color_p))];
     }
-    // Eğer ray X yönünde (doğu veya batı) bir duvara çarpmışsa
-    else
+    else // X yönünde çarpma
     {
-      //  printf("XXXXXXXXXgame->side == 0\n");
+        texWidth = game->texture.EA.row_size;
+        texHeight = game->texture.EA.line_height;
+
+        texX = (int)(game->perpWallDist_x * texWidth) % texWidth;
+        texY = (int)(game->perpWallDist_y * texHeight) % texHeight;
+
         if (game->rayDirX > 0)
-            color = game->texture.EA.pixels[game->rayMapX + game->rayMapY * game->texture.EA.count];
+            color = game->texture.EA.pixels[texX + texY * (game->texture.EA.row_size / sizeof(t_color_p))];
         else
-            color = game->texture.WE.pixels[game->rayMapX + game->rayMapY * game->texture.WE.count];
+            color = game->texture.WE.pixels[texX + texY * (game->texture.WE.row_size / sizeof(t_color_p))];
     }
 
     return color;
+
 }
 
 int key_press(int keycode, t_game *game) {
@@ -205,9 +239,18 @@ void raycast(t_game *game)
         }
 
         if (game->side == 0)
+        {
             game->perpWallDist = game->sideDistX - game->deltaDistX;
+            game->perpWallDist_x = game->rayDirX;
+            game->perpWallDist_y = (game->rayMapX - game->map.player.pos.x + (1 - game->stepX) / 2) / game->rayDirX;
+
+        }
         else
+        {
             game->perpWallDist = game->sideDistY - game->deltaDistY;
+            game->perpWallDist_x = (game->rayMapY - game->map.player.pos.y + (1 - game->stepY) / 2) / game->rayDirY;
+            game->perpWallDist_y = game->rayDirY;
+        }
 
         game->lineHeight = (int)(SCREEN_HEIGHT / game->perpWallDist);
         game->drawStart = (-game->lineHeight / 2) + (SCREEN_HEIGHT / 2);
@@ -219,7 +262,7 @@ void raycast(t_game *game)
 
   t_color_p color;
     color = get_wall_color(game);
-        verLine(game, x, game->drawStart, game->drawEnd, game->wallColor);
+    verLine(game, x, game->drawStart, game->drawEnd, color);
     }
     // FPS Hesaplaması
     gettimeofday(&endTime, NULL); // Frame bitiminde zamanı alıyoruz

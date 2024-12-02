@@ -136,6 +136,8 @@ typedef struct s_game
 	double 	sideDistY; //ray in y yönündeki uzaklığı
 	double 	deltaDistX; //ray in x yönündeki adımı
 	double 	deltaDistY; //ray in y yönündeki adımı
+	double  perpWallDist_x;
+	double  perpWallDist_y;
 	int 	stepX;
 	int 	stepY;
 	int 	hit;
