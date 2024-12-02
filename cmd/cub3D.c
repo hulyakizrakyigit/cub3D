@@ -71,6 +71,8 @@ int main(int ac, char **av)
 	init_mlx_and_game(game);
 	mlx_hook(game->win_ptr, 17, 0, close_window, &game); //çarpı işaretinden kapanacak
 	mlx_hook(game->win_ptr, KeyPress, (1L << 0), key_press_handler, game);
+	// mlx_key_hook(game->win_ptr, key_release_handler, game);
+	// mlx_key_hook(game->win_ptr, key_press_handler, game);
 	mlx_hook(game->win_ptr, KeyRelease, (1L << 1), key_release_handler, game);
     mlx_key_hook(game->win_ptr, esc_press, game); //esc ile kapancak
 	if (image_up(game) != OK)

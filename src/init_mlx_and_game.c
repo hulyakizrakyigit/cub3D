@@ -22,12 +22,12 @@ void	init_var(t_game *game)
         printf("malloc failed!\n");
         exit(1);
     }
-    game->moves->a = 0;
-    game->moves->d = 0;
-    game->moves->s = 0;
     game->moves->w = 0;
-    game->moves->left = 0;
+    game->moves->a = 0;
+    game->moves->s = 0;
+    game->moves->d = 0;
     game->moves->right = 0;
+    game->moves->left = 0;
     game->player.pos.x = 4.5;
     game->player.pos.y = 5.5;
     game->player.dir.x = 0.0;

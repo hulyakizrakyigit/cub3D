@@ -306,14 +306,15 @@ void	draw_background(t_game *game)
 	t_color_p f_color;
 
 	c_color.alpha = 0;
-	c_color.red = (unsigned char)(game->texture.C.R);
-	c_color.green = (unsigned char)(game->texture.C.G);
-	c_color.blue = (unsigned char)(game->texture.C.B);
+	c_color.red = (unsigned char)(game->map.texture.C.R);
+	c_color.green = (unsigned char)(game->map.texture.C.G);
+	c_color.blue = (unsigned char)(game->map.texture.C.B);
 
 	f_color.alpha = 0;
-	f_color.red = (unsigned char)(game->texture.F.R);
-	f_color.green = (unsigned char)(game->texture.F.G);
-	f_color.blue = (unsigned char)(game->texture.F.B);
+	f_color.red = (unsigned char)(game->map.texture.F.R);
+	f_color.green = (unsigned char)(game->map.texture.F.G);
+	f_color.blue = (unsigned char)(game->map.texture.F.B);
+
 
 	i = 0;
  	while (i < HEIGHT / 2)
@@ -377,14 +378,13 @@ float cal_tex_y(t_img *texture, float wall_height, float pos)
 
 void ft_put_pixel(t_game *game, int x, int y, t_color_p color)
 {
-    if (x < 0 || x >= game->win_width || y < 0 || y >= game->win_height)
-        return;
+	int i;
 
-    // Piksel bellek adresine doğru erişim
-    game->mlx_pixels[(x * 4) + (y * game->mlx_row_size) + 0] = color.blue;
-    game->mlx_pixels[(x * 4) + (y * game->mlx_row_size) + 1] = color.green;
-    game->mlx_pixels[(x * 4) + (y * game->mlx_row_size) + 2] = color.red;
-    game->mlx_pixels[(x * 4) + (y * game->mlx_row_size) + 3] = color.alpha;
+	i = (x * 4) + (y * game->mlx_row_size);
+	game->mlx_pixels[i] = color.blue;
+	game->mlx_pixels[i + 1] = color.green;
+	game->mlx_pixels[i + 2] = color.red;
+	game->mlx_pixels[i + 3] = color.alpha;
 
 }
 
@@ -551,7 +551,95 @@ void	draw_walls(t_game *game)
 		i++;
 	}
 }
+void	ft_draw_rect(t_game *game, int x, int y, int color)
+{
+	int	i;
+	int	j;
 
+	i = 0;
+	while (i < 10)
+	{
+		j = 0;
+		while (j < 10)
+		{
+			mlx_pixel_put(game->mlx, game->win_ptr, x + j, y + i, color);
+			j++;
+		}
+		i++;
+	}
+}
+static void	draw_bg(t_game *game)
+{
+	int	x;
+	int	y;
+
+	y = 0;
+	while (y < game->map.map_height)
+	{
+		x = 0;
+		while (x < game->map.map_width)
+		{
+			ft_draw_rect(game, x * 10, y
+				* 10, 0x97000000);
+			x++;
+		}
+		y++;
+	}
+}
+
+void	ft_draw_circle(t_game *game, int *center, int radius, int color)
+{
+	int	x;
+	int	y;
+	int	sq_radius;
+
+	sq_radius = radius * radius;
+	y = -radius;
+	while (y <= radius)
+	{
+		x = -radius;
+		while (x <= radius)
+		{
+			if (x * x + y * y <= sq_radius)
+				mlx_pixel_put(game->mlx, game->win_ptr,
+					center[0] + x, center[1] + y, color);
+			x++;
+		}
+		y++;
+	}
+}
+void	draw2(t_game *game)
+{
+	int	*player_minimap;
+
+	player_minimap = malloc(sizeof(int) * 2);
+	player_minimap[0] = game->player.pos.x * 10;
+	player_minimap[1] = game->player.pos.y * 10;
+	ft_draw_circle(game, player_minimap, 6, 0xFF0000);
+
+	free (player_minimap);
+}
+
+void	draw_minimap(t_game *game)
+{
+	int	x;
+	int	y;
+
+	draw_bg(game);
+	y = 0;
+	while (y < game->map.map_height)
+	{
+		x = 0;
+		while (x < game->map.map_width)
+		{
+			if (game->map.map[y][x] == '1')
+				ft_draw_rect(game, x * 10, y* 10, 0xFFFFFF);
+			x++;
+		}
+		y++;
+	}
+	draw2(game);
+}
 
 int	start_game(void *params)
 {
@@ -564,10 +652,12 @@ int	start_game(void *params)
 	game->time = (double)(curr_time.tv_sec - old_time.tv_sec) + (double)(curr_time.tv_usec - old_time.tv_usec) / 1000000;
 	old_time = curr_time;
 	handle_player(game);
-	handle_ray(game);
 	draw_background(game);
-	//draw_walls(game);
+	draw_walls(game);
+	handle_ray(game);
 	mlx_put_image_to_window(game->mlx, game->win_ptr, game->mlx_img, 0, 0);
+	// draw_minimap(game);
+
 	fps = ft_itoa((int)(1 / game->time));
 	// mlx_string_put(game->mlx, game->win_ptr, HEIGHT, WIDTH, 0x00FF0000, fps); // 0x00FF0000??
 	free(fps);

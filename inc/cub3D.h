@@ -85,7 +85,7 @@ typedef union u_color_p
 
 typedef struct s_moves
 {
-	t_bool	esc;
+	// t_bool	esc;
 	t_bool	w;
 	t_bool	a;
 	t_bool	s;
@@ -98,11 +98,6 @@ typedef enum e_mlx_event
 {
 	KeyPress = 2,
 	KeyRelease = 3,
-	ButtonPress = 4,
-	ButtonRelease = 5,
-	MotionNotify = 6,
-	Expose = 12,
-	Destroy = 17
 }	t_mlx_event;
 
 typedef struct s_raycast

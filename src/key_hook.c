@@ -2,25 +2,35 @@
 
 int key_press_handler(int key_code, t_game *game)
 {
+	// printf("key_code: %d\n", key_code);
+	// printf("game->moves->w: %d\n", game->moves->w);
+	// printf("game->moves->a: %d\n", game->moves->a);
+	// printf("game->moves->s: %d\n", game->moves->s);
+	// printf("game->moves->d: %d\n", game->moves->d);
+
 	if (key_code == W_KEY)
 		game->moves->w = -1;
 	else if (key_code == A_KEY)
 		game->moves->a = -1;
 	else if (key_code == S_KEY)
-		game->moves->s = -1;
+		game->moves->s = 1;
 	else if (key_code == D_KEY)
-		game->moves->d = -1;
+		game->moves->d = 1;
 	else if (key_code == LEFT_KEY)
 		game->moves->left = -1;
 	else if (key_code == RIGHT_KEY)
-		game->moves->right = -1;
-
+		game->moves->right = 1;
 	return (0);
 
 }
 
 int	key_release_handler(int keycode, t_game *game)
 {
+	printf("key_code: %d\n", keycode);
+	printf("game->moves->w: %d\n", game->moves->w);
+	printf("game->moves->a: %d\n", game->moves->a);
+	printf("game->moves->s: %d\n", game->moves->s);
+	printf("game->moves->d: %d\n", game->moves->d);
 	if (keycode == W_KEY)
 		game->moves->w = 0;
 	else if (keycode == A_KEY)
