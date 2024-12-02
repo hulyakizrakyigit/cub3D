@@ -7,7 +7,9 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
-#include <stdbool.h>
+# include <stdbool.h>
+# include <math.h>
+# include <sys/time.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -27,6 +29,7 @@ typedef union s_color_p
 	};
 	// unsigned int color;
 } t_color_p;
+
 typedef struct s_img
 {
 	void	*img;
@@ -51,8 +54,6 @@ typedef struct s_color
 
 } t_color;
 
-
-
 typedef struct s_texture
 {
 	t_img NO;
@@ -64,17 +65,17 @@ typedef struct s_texture
 
 } t_texture;
 
-
 typedef struct s_vec
 {
 	double x;
 	double y;
 }	t_vec;
+
 typedef struct s_player
 {
 	int x;
 	int y;
-	char direction;
+	char direction; //?
 	t_vec plane;
 	t_vec dir;
 	t_vec pos;
@@ -113,6 +114,7 @@ typedef struct s_mlx
 	int 	win_height;
 	t_img 	img;
 } t_mlx;
+
 typedef struct s_game
 {
 	t_map	map;
@@ -121,6 +123,28 @@ typedef struct s_game
 	t_mlx 	mlx;
 	t_color_p floor;
 	t_color_p ceiling;
+	t_color_p wallColor;
+	double 	time; //o anki frame in zamanı
+	double 	oldTime; //önceki frame in zamanı
+	double 	cameraX; //kamera düzlemindeki x koordinatı
+	double 	rayDirX; //ray in x yönündeki vektörü
+	double 	rayDirY; //ray in y yönündeki vektörü
+	int	  	rayMapX; //ray in bulunduğu map karesinin (box or frame) x koordinatı
+	int  	rayMapY; //ray in bulunduğu map karesinin y koordinatı 
+	double 	sideDistX; //ray in x yönündeki uzaklığı
+	double 	sideDistY; //ray in y yönündeki uzaklığı
+	double 	deltaDistX; //ray in x yönündeki adımı
+	double 	deltaDistY; //ray in y yönündeki adımı
+	int 	stepX;
+	int 	stepY;
+	int 	hit;
+	int 	side;
+	double 	perpWallDist; //ray in uzunluğunu hesaplamak için
+	int 	lineHeight; //ekran üzerinde çizilecek çizginin yüksekliği
+	int 	drawStart; //çizginin başlangıç noktası
+	int 	drawEnd; //çizginin bitiş noktası
+	double frameTime; //frame in süresi
+	double fps; //frame per second
 } t_game;
 
 // err.c
@@ -178,6 +202,13 @@ int esc_press(int keycode, t_game *game);
 //
 t_err image_up(t_game *game);
 int	start_game(void *param);
-
+void ft_put_pixel(t_game *game, int x, int y, t_color_p color);
+void verLine(t_game *game, int x, int drawStart, int drawEnd, t_color_p color);
+void raycast(t_game *game);
+void draw_background(t_game *game);
+void rotate_player(t_game *game, double rotation);
+void move_player(t_game *game, int direction);
+int key_press(int keycode, t_game *game);
+t_color_p get_wall_color(void);
 
 #endif

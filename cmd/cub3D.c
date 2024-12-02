@@ -67,7 +67,7 @@ int main(int ac, char **av)
 		return (dispose(game), 1);
 	}
 	mlx_hook(game->mlx.win_ptr, 17, 0, close_window, game); //çarpı işaretinden kapanacak
-    mlx_key_hook(game->mlx.win_ptr, esc_press, game); //esc ile kapancak 
+    mlx_key_hook(game->mlx.win_ptr, key_press, game); //esc ile kapancak 
 	if (image_up(game) != OK)
 	{
 		perr(__func__, "image up failed");
